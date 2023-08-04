@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>git-latexdiff web</title>
+</head>
+<body>
+    <h1>git-latexdiff web</h1>
+    A web interface for <a href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a>
+    <br><br>
+    
+    <h2 id="wait" style="display: none;">Please wait at least 20s.</h2>
+    <form id="form" action = "/latexdiff" method = "POST" enctype = "multipart/form-data" onSubmit="process()">
+        <label for="username">Your name:</label>
+        <input id="username" type = "text" name = "username" value="unknown" /><br><br>
+        <label for="old_project_zip">Old version of zip project downloaded from Overleaf:</label>
+        <input id="old_project_zip" type = "file" name = "old_project_zip" /><br><br>
+        <label for="new_project_zip">New version of zip project downloaded from Overleaf:</label>
+        <input id="new_project_zip" type = "file" name = "new_project_zip" /><br><br>
+        <label for="main_tex">Main tex filename:</label>
+        <input id="main_tex" type = "text" name = "main_tex" /><br><br>
+        <label for="other_options">Other git-latexdiff options:</label>
+        <input id="other_options" type = "text" name = "other_options" value="--latexopt -shell-escape" /><br><br>
+        <input type="submit" value="Submit"/>
+    </form>
+<script>
+function process() {
+    document.getElementById("form").style.display = 'none';
+    document.getElementById("wait").style.display = 'block';
+};
+</script>
+</body>
+</html>
