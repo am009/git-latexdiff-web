@@ -29,7 +29,7 @@ def upload_file():
         timeout = request.form.get('timeout', 10.0, type=float)
         returncode, output, result_diff, cmd_str = do_latex_diff(old_proj_zip, new_proj_zip, username, main_tex, other_options, timeout)
         if result_diff is not None:
-            return send_file(result_diff)
+            return send_file(result_diff, download_name=f'diff-{secure_filename(old_proj_zip.filename)}-{secure_filename(new_proj_zip.filename)}-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.pdf')
         else:
             return render_template("error.html", return_code=returncode, output=output, cmd_str=cmd_str)
     return "unknown request method"
