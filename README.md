@@ -8,6 +8,8 @@ An extremely simple web interface for git-latexdiff. by uploading two overleaf t
 
 ## run
 
+On Ubuntu, install tex environment: `sudo apt install texlive-full`.
+
 ```
 gunicorn --bind 0.0.0.0:5000 wsgi:app
 ```
