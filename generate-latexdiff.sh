@@ -43,7 +43,7 @@ git add --all
 git commit -m "new version"
 echo "========== begin git latex-diff =========="
 echo git latexdiff HEAD^ $OTHER_OPTS "${OPTS[@]}" --output "../diff.pdf"
-git latexdiff HEAD^ $OTHER_OPTS "${OPTS[@]}" --output "../diff.pdf"
+timeout --kill-after=10s 30m git latexdiff HEAD^ $OTHER_OPTS "${OPTS[@]}" --output "../diff.pdf"
 popd
 
 echo git latex-diff runs successfully
