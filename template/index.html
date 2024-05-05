@@ -2,9 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>git-latexdiff web</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown.min.css" integrity="sha512-h/laqMqQKUXxFuu6aLAaSrXYwGYQ7qk4aYCQ+KJwHZMzAGaEoxMM6h8C+haeJTU1V6E9jrSUnjpEzX23OmV/Aw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
+    
+        @media (max-width: 767px) {
+            .markdown-body {
+                padding: 15px;
+            }
+        }
+    </style>
+    <title>Latex Diff Online</title>
 </head>
 <body>
+<article class="markdown-body">
     <h1>git-latexdiff web</h1>
     A web interface for <a href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a>
     <br><br>
@@ -23,6 +40,23 @@
         <input id="other_options" type = "text" name = "other_options" value="--latexopt -shell-escape --ignore-latex-errors" /><br><br>
         <input type="submit" value="Submit"/>
     </form>
+
+    <script src="https://giscus.app/client.js"
+        data-repo="am009/git-latexdiff-web"
+        data-repo-id="R_kgDOKDZDvQ"
+        data-category="Giscus"
+        data-category-id="DIC_kwDOKDZDvc4CfHLj"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+    </script>
+</article>
 <script>
 function process() {
     document.getElementById("form").style.display = 'none';

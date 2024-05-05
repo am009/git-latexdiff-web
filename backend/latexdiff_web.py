@@ -61,6 +61,8 @@ def do_latex_diff(old_proj_zip: FileStorage, new_proj_zip: FileStorage, username
     except subprocess.TimeoutExpired as e:
         return -1, f"latexdiff timeout: {e.stdout}", None, cmd_str
     result_diff = os.path.join(proj_dpath, "diff.pdf")
+    with open(os.path.join(proj_dpath, "log.txt"), "wb") as f:
+        f.write(proc.stdout)
     if not os.path.exists(result_diff):
         result_diff = None
     return proc.returncode, proc.stdout.decode(), result_diff, cmd_str

@@ -1,0 +1,14 @@
+{
+    "other_cmdlines": "--latexopt -shell-escape --ignore-latex-errors",
+    "style": {
+        "new_text": {
+            "color": [0,0,255],
+            "style": null
+        },
+        "old_text": {
+            "color": null,
+            "style": "underline_wave"
+        }
+    },
+    "main_tex": "main.tex"
+}

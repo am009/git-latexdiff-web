@@ -1,0 +1,5 @@
+{
+    "other_cmdlines": "--latexopt -shell-escape --ignore-latex-errors",
+    "style": "test",
+    "main_tex": "main.tex"
+}

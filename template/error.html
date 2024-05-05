@@ -2,12 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown.min.css" integrity="sha512-h/laqMqQKUXxFuu6aLAaSrXYwGYQ7qk4aYCQ+KJwHZMzAGaEoxMM6h8C+haeJTU1V6E9jrSUnjpEzX23OmV/Aw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
+    
+        @media (max-width: 767px) {
+            .markdown-body {
+                padding: 15px;
+            }
+        }
+    </style>
     <title>Error</title>
 </head>
 <body>
-    <h1>Error</h1>
-    command: {{ cmd_str }} <br> <br>
+<article class="markdown-body">
+    <h1>Error Occurred!</h1>
+    command to reproduce: <code>{{ cmd_str }}</code> <br> <br>
     return code: {{ return_code }} <br> <br>
-    <span style="white-space: pre-wrap;">{{ output }}</span>
+    error message:
+    <div class="highlight highlight-source-shell"><pre>{{ output }}</pre></div>
+    <!-- TODO add link to create an issue directly -->
+</article>
 </body>
 </html>
