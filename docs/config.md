@@ -22,3 +22,5 @@ To use the latexdiff docker runner image, or to reproduce the result of using th
     - Should be one of UNDERLINE CTRADITIONAL TRADITIONAL CFONT FONTSTRIKE INVISIBLE CHANGEBAR CCHANGEBAR CULINECHBAR CFONTCHBAR BOLD PDFCOMMENT
     - See the [manual](http://texdoc.net/texmf-dist/doc/support/latexdiff/doc/latexdiff-man.pdf) for more detail.
 - `main_tex` (string): The main tex filename. Must be the same for the old and new project.
+- `bib` (string or null): Generate bibliography, use bibtex or biber.
+  - Should be one of "bibtex" or "biber" or null

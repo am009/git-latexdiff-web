@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@giscus/react": "^3.0.0",
-    "antd": "^5.17.0",
+    "antd": "5.16.5",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18"
