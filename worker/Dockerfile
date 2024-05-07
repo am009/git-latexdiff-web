@@ -1,13 +1,9 @@
-# 
-FROM am009/latex
+# based on a latex environment image
+FROM am009/latex:latest
 
 # docker build . --tag am009/latexdiff-web-worker
 
-# install jq
-RUN apt-get update && \
- DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends jq && \
- apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
- mkdir /work
+RUN git config --global init.defaultBranch main
 
 # Copy the script
 COPY run.sh preamble_gen.py /root/

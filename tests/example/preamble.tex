@@ -1,0 +1,19 @@
+\RequirePackage[normalem]{ulem}
+\RequirePackage{color}\definecolor{myadd}{RGB}{0,0,255}
+\providecommand{\DIFadd}[1]{\protect{\color{myadd}#1}}
+\providecommand{\DIFdel}[1]{\protect\uwave{#1}}
+%DIF SAFE PREAMBLE
+\providecommand{\DIFaddbegin}{}
+\providecommand{\DIFaddend}{}
+\providecommand{\DIFdelbegin}{}
+\providecommand{\DIFdelend}{}
+\providecommand{\DIFmodbegin}{}
+\providecommand{\DIFmodend}{}
+%DIF FLOATSAFE PREAMBLE
+\providecommand{\DIFaddFL}[1]{\DIFadd{#1}}
+\providecommand{\DIFdelFL}[1]{\DIFdel{#1}}
+\providecommand{\DIFaddbeginFL}{}
+\providecommand{\DIFaddendFL}{}
+\providecommand{\DIFdelbeginFL}{}
+\providecommand{\DIFdelendFL}{}
+

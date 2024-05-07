@@ -25,6 +25,7 @@ import message from 'antd/es/message';
 const { Option } = Select;
 
 export default function Home() {
+  const [dockerCmd, setDockerCmd] = useState("docker run --rm -v <path-to-folder>:/work am009/latexdiff-web-worker");
   const [configJson, setConfigJson] = useState("");
   const [pdfURL, setPdfURL] = useState("");
   const [zipURL, setZipURL] = useState("");
@@ -120,17 +121,18 @@ export default function Home() {
 
   const handleResponse = (data: any) => {
     setDockerOut(data.docker_output);
+    setDockerCmd(data.docker_cmd);
     // download the diff project zip.
     if (data.diff_proj !== null) {
       setZipURL(dataToBlobURL(data.diff_proj));
     }
     // download the diff pdf
-    if (data.diff_proj !== null) {
+    if (data.diff_pdf !== null) {
       let url = dataToBlobURL(data.diff_pdf);
       setPdfURL(url);
       window.open(url, '_blank');
     } else {
-      message.error("Failed to generate diff pdf.");
+      message.error("Failed to generate diff pdf.", 6);
     }
   }
   // Submitting the form
@@ -145,9 +147,13 @@ export default function Home() {
     form.append("config", JSON.stringify(config));
     form.append("download_diff_proj", fields.download_diff_proj ? "true" : "false");
 
+    // reset all progress
     setIsLoading(true);
     setSendProgress(0);
     setReceiveProgress(0);
+    setDockerOut('');
+    setPdfURL('');
+    setZipURL('');
     setCurrentTab("2");
 
     const xhr = new XMLHttpRequest();
@@ -163,23 +169,24 @@ export default function Home() {
         setReceiveProgress(event.loaded / event.total);
       }
     });
-    xhr.onerror = function () {
+    xhr.onerror = function (event) {
+      // cannot get detailed error message here.
       console.log("An error occurred during the request");
-      message.error("An error occurred during the request");
+      message.error("An error occurred during the request", 6);
     };
-    xhr.addEventListener("loadend", () => {
+    xhr.addEventListener("loadend", (event) => {
       setIsLoading(false);
     });
     xhr.onload = function (e) {
       console.log(`${e.loaded} bytes transferred\n`);
       if (xhr.status != 200) {
         console.error("Error:", xhr.statusText);
-        message.error("request failed: " + xhr.statusText);
+        message.error("request failed: " + xhr.statusText, 6);
       } else {
         handleResponse(JSON.parse(xhr.responseText));
       }
     };
-    xhr.open('POST', currentScheme + fields.api_endpoint, true);
+    xhr.open('POST', currentScheme + fields.api_endpoint + '/latexdiff', true);
     xhr.send(form);
 
     // fetch(currentScheme + fields.api_endpoint, {
@@ -194,11 +201,11 @@ export default function Home() {
     // }).catch((error) => {
     //   setIsLoading(false);
     //   console.error("Error:", error);
-    //   message.error("Failed to send diff request.");
+    //   message.error("Failed to send diff request.", 6);
     // });
   }
   const onFinishFailed = (errorInfo: any) => {
-    message.error(errorInfo.errorFields[0].errors[0]);
+    message.error(errorInfo.errorFields[0].errors[0], 6);
     console.log("Failed:", errorInfo);
   };
   const normFile = (e: any) => {
@@ -223,7 +230,7 @@ export default function Home() {
           getValueFromEvent={normFile}
           label="Old version of zip project downloaded from Overleaf:"
           rules={[{ required: true, message: 'Please select old project zip file!' }]}>
-          <Upload maxCount={1}>
+          <Upload beforeUpload={() => false} maxCount={1} accept='zip,application/zip,application/x-zip,application/x-zip-compressed'>
             <Button icon={<UploadOutlined />}>Select New Latex zip project</Button>
           </Upload>
         </Form.Item>
@@ -232,7 +239,7 @@ export default function Home() {
           getValueFromEvent={normFile}
           label="New version of zip project downloaded from Overleaf:"
           rules={[{ required: true, message: 'Please select new project zip file!' }]}>
-          <Upload maxCount={1}>
+          <Upload beforeUpload={() => false} maxCount={1} accept='zip,application/zip,application/x-zip,application/x-zip-compressed'>
             <Button icon={<UploadOutlined />}>Select Old Latex zip project</Button>
           </Upload>
         </Form.Item>
@@ -278,7 +285,7 @@ export default function Home() {
           <span>Text style: </span>
           <Select
             disabled={!isNewTextVisible()}
-            defaultValue="none"
+            value={newTextStyle}
             style={{ width: 120 }}
             onChange={value => setNewTextStyle(value)}
             options={[
@@ -299,7 +306,7 @@ export default function Home() {
           <span>Text style: </span>
           <Select
             disabled={!isOldTextVisible()}
-            defaultValue="strikeout"
+            value={oldTextStyle}
             style={{ width: 120 }}
             onChange={value => setOldTextStyle(value)}
             options={[
@@ -313,7 +320,7 @@ export default function Home() {
           <Select
             value={fields.bib}
             style={{ width: 200 }}
-            onChange={value => { fields.bib = value; }}
+            onChange={value => { setFields({ ...fields, bib: value }); }}
             options={[
               { value: 'none', label: 'don\'t show bib' },
               { value: 'bibtex', label: 'bibtex' },
@@ -322,7 +329,9 @@ export default function Home() {
           />
         </Form.Item>
         <Form.Item>
-          <Checkbox>Additionally download the diffed latex project as zip file</Checkbox>
+          <Checkbox onChange={e => { setFields({...fields, download_diff_proj: e.target.checked}); }}>
+            Additionally download the diffed latex project as a tar file
+          </Checkbox>
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit"><UploadOutlined />Submit</Button>
@@ -353,28 +362,28 @@ export default function Home() {
         <Button type="primary" icon={<DownloadOutlined />} disabled={pdfURL.length === 0} target="_blank" href={pdfURL}>
           Download Diff PDF
         </Button>
-        <Button type="primary" icon={<DownloadOutlined />} disabled={zipURL.length === 0} download="diff_proj.zip" href={zipURL}>
-          Download Diff project ZIP
+        <Button type="primary" icon={<DownloadOutlined />} disabled={zipURL.length === 0} download="diff_proj.tar" href={zipURL}>
+          Download Diff project TAR
         </Button>
       </Space>
 
       <Title level={3}>Docker Output</Title>
-      <TextArea value={dockerOut} readOnly rows={4} />
+      <TextArea value={dockerOut} readOnly rows={8} />
       <Title level={3}>Reproduction</Title>
-      <Text strong>To reproduce this diff run: , then run this command:</Text>
+      <Text strong>To reproduce this diff run:</Text>
       <Paragraph>
         <ul>
           <li>
             Prepare a folder with new.zip, old.zip, and config.json.
-            The content of config.json:
+            The content of config.json is the following:
             <Paragraph code copyable>{configJson}</Paragraph>
           </li>
           <li>
             Run the following docker command:
-            <Paragraph code copyable>docker run --rm -v &lt;path-to-folder&gt;:/work am009/latexdiff-web-worker</Paragraph>
+            <Paragraph code copyable>{dockerCmd}</Paragraph>
           </li>
           <li>
-            The result pdf path is &lt;path-to-folder&gt;/aa. The result latex project is at &lt;path-to-folder&gt;/aa.
+            The result pdf path is &lt;path-to-folder&gt;/diff.pdf. The result latex project is at &lt;path-to-folder&gt;/git-latexdiff/new.
           </li>
         </ul>
       </Paragraph>
@@ -384,10 +393,9 @@ export default function Home() {
   return (
     <div>
       <Flex align="center" vertical>
-      <Title><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
-      <Text strong>An online tool based on <a target="_blank" href="https://github.com/ftilmann/latexdiff">latexdiff</a> and <a target="_blank" href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a>.</Text>
+        <Title><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
+        <Text strong>An online tool based on <a target="_blank" href="https://github.com/ftilmann/latexdiff">latexdiff</a> and <a target="_blank" href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a>.</Text>
       </Flex>
-      <br />
       <br />
 
       <Tabs

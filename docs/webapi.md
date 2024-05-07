@@ -19,3 +19,4 @@
   - `diff_pdf` (base64 string): base64 encoded diff.pdf file.
   - `diff_proj` (base64 string): base64 encoded diff project file.
   - `docker_output` (string): docker run output.
+  - `docker_cmd` (string): the docker run command.

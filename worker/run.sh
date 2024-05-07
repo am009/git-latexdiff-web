@@ -4,17 +4,17 @@ set -e
 
 if [ -z "$1" ]
   then
-    echo "No argument 1: config file path, default to /work/new.zip"
+    echo "No 1st argument, config file path, default to /work/new.zip"
 fi
 
 if [ -z "$2" ]
   then
-    echo "No argument 2: old project zip path, default to /work/old.zip"
+    echo "No 2nd argument, old project zip path, default to /work/old.zip"
 fi
 
 if [ -z "$3" ]
   then
-    echo "No argument 3: new project zip path, default to /work/config.json"
+    echo "No 3rd argument, new project zip path, default to /work/config.json"
 fi
 
 CONFIG_PATH="${1:-/work/config.json}"
@@ -59,35 +59,46 @@ if [ "$STYLE_TYPE" == "string" ]
     OPTS+=("--preamble" "/work/preamble.tex")
 fi
 
+# check the bib field in config.json
+BIB=$(jq -r '.bib' "$CONFIG_PATH")
+# check if BIB_TYPE is string
+if [ "$BIB" == "bibtex" ]; then
+  OPTS+=("--bibtex")
+elif [ "$BIB" == "biber" ]; then
+  OPTS+=("--biber")
+fi
+
 GIT_DIR=$BASE_DIR/git
 
 # create the git repo and run the latexdiff
 
 rm -rf "$GIT_DIR"
 unzip -q "$VERSION1" -d "$GIT_DIR"
-pushd "$GIT_DIR"
+pushd "$GIT_DIR" > /dev/null
 git init
 git config user.name "latexdiff-web"
 git config user.email "latexdiff-web@nowhere.no"
 git add --all
 git commit -m "old version"
-popd
+popd > /dev/null
 
 unzip -q -o "$VERSION2" -d "$GIT_DIR"
-pushd "$GIT_DIR"
+pushd "$GIT_DIR" > /dev/null
 git add --all
-git commit -m "new version"
+git commit -m "new version" || (echo "error: git commit failed. no changes in new version?" && exit 1)
 echo "========== begin git latex-diff =========="
 
-if [[ -z "${DEBUG}" ]]; then
-  OPTS+=("--output" "../diff.pdf")
-else
-  OPTS+=("--no-cleanup")
-fi
+OPTS+=("--no-cleanup" "--no-view")
 
 echo git latexdiff -v --tmpdirprefix $BASE_DIR HEAD^ $OTHER_OPTS "${OPTS[@]}"
-timeout --kill-after=10s 30m git latexdiff -v --tmpdirprefix $BASE_DIR HEAD^ $OTHER_OPTS "${OPTS[@]}"
+set +e
+timeout --kill-after=10s 30m \
+  git latexdiff -v --tmpdirprefix $BASE_DIR HEAD^ $OTHER_OPTS "${OPTS[@]}"
+mv $BASE_DIR/git-latexdiff* $BASE_DIR/git-latexdiff || echo "move git-latexdiff temporary dir failed"
+mv $BASE_DIR/git-latexdiff/*.pdf $BASE_DIR/diff.pdf
 echo "========== end git latex-diff =========="
-popd
+popd > /dev/null
 
-echo git latex-diff finished
+if [ ! -z "$USER" ]; then
+  chown -R "$USER" "$BASE_DIR"
+fi
