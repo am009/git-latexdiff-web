@@ -97,7 +97,8 @@ def do_latex_diff(old_proj_zip: FileStorage, new_proj_zip: FileStorage, config: 
         finally:
             subprocess.run(f"docker stop -t 5 {container_name}".split(' '), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         diff_pdf = None
-        if os.path.exists(os.path.join(tempdir, "diff.pdf")):
+        diff_pdf_path = os.path.join(tempdir, "diff.pdf")
+        if os.path.exists(diff_pdf_path) and os.path.isfile(diff_pdf_path) and not os.path.islink(diff_pdf_path):
             diff_pdf = os.path.join(tempdir, "diff.pdf")
             diff_pdf = file2b64(diff_pdf)
         if download_diff_proj:
