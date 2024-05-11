@@ -5,6 +5,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 
 DEBUG = (__name__ == '__main__')
 TIMEOUT_LIMIT = 600.0
+REDIR_ROOT = os.environ.get('REDIR_ROOT', None).lower() in ['true', '1', 'yes', 'y']
 
 from flask import Flask, request, redirect, jsonify, send_from_directory
 from flask_cors import CORS, cross_origin
@@ -24,13 +25,13 @@ def gen_redir():
 
 @app.route('/')
 def send_index():
-    if not os.path.exists('static'):
+    if REDIR_ROOT or not os.path.exists('static'):
         return gen_redir()
     return send_from_directory('static', 'index.html')
 
 @app.route('/<path:path>')
 def send_web(path):
-    if not os.path.exists('static'):
+    if REDIR_ROOT or not os.path.exists('static'):
         return gen_redir()
     return send_from_directory('static', path)
 
