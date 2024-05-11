@@ -1,5 +1,5 @@
 # Deploy a Next.js site to GitHub Pages
-name: Deploy Next.js site to Pages
+name: Deploy pages and build backend image
 
 on:
   push:
@@ -89,6 +89,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          clean: false
           sparse-checkout: 'backend'
           sparse-checkout-cone-mode: false
       # All files should be moved to the project root.
