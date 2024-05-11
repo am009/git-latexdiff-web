@@ -6,7 +6,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 DEBUG = (__name__ == '__main__')
 TIMEOUT_LIMIT = 600.0
 
-from flask import Flask, request, redirect, jsonify
+from flask import Flask, request, redirect, jsonify, send_from_directory
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -23,8 +23,16 @@ def gen_redir():
     return redirect(url)
 
 @app.route('/')
-def index():
-    return gen_redir()
+def send_index():
+    if not os.path.exists('static'):
+        return gen_redir()
+    return send_from_directory('static', 'index.html')
+
+@app.route('/<path:path>')
+def send_web(path):
+    if not os.path.exists('static'):
+        return gen_redir()
+    return send_from_directory('static', path)
 
 @app.route('/latexdiff', methods = ['GET', 'POST'])
 def upload_file():

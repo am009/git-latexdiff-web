@@ -20,6 +20,7 @@ RUN if [[ ! -z "$UBUNTU_MIRROR" ]] ; then sed -i "s/archive.ubuntu.com/$UBUNTU_M
 
 # Copy the backend api
 COPY latexdiff_web.py wsgi.py /root/
+COPY static /root/static/
 
 ENTRYPOINT ["/bin/bash", "-c"]
 CMD ["/usr/bin/python3 -m gunicorn wsgi:app -b 0.0.0.0:8000 --timeout 3600 --workers $(( $(nproc) * 2 ))"]

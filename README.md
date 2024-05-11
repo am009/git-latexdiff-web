@@ -5,6 +5,7 @@ Keywords: latexdiff latex diff web online pdfdiff
 An web interface for [git-latexdiff](https://gitlab.com/git-latexdiff/git-latexdiff) (which is eventually based on [latexdiff](https://github.com/ftilmann/latexdiff)). 
 
 - Easy to Use: The input is two overleaf project zip file.
+- Run your own backend: You can run and use your own backend, no file is sent to any remote server.
 - Ready for paper submission: TODO
 
 ## Use it online!
@@ -13,6 +14,13 @@ An web interface for [git-latexdiff](https://gitlab.com/git-latexdiff/git-latexd
 - Use the provided default API endpoint: All uploaded files will be deleted and not preserved.
 
 (P.S. I'm excited to provide my first public service to the whole internet. Any issue related to the public API endpoint is also welcomed.)
+
+## Run the web backend
+
+```
+docker pull am009/latexdiff-web-worker && \
+docker run -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp --name latexdiff-backend -d am009/latexdiff-web-backend
+```
 
 ## Use as a command line tool
 
