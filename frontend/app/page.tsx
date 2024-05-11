@@ -73,7 +73,7 @@ export default function Home() {
   }, []);
 
   const [fields, setFields] = useState({
-    "api_endpoint": "latexdiff.cn",
+    "api_endpoint": "backend.latexdiff.cn",
     "main_tex": "main.tex",
     "other_cmdlines": "--latexopt -shell-escape --ignore-latex-errors",
     "download_diff_proj": false,

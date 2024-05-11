@@ -31,7 +31,7 @@ jobs:
           sparse-checkout: 'frontend'
           sparse-checkout-cone-mode: false
       # All files should be moved to the project root.
-      - name: Move mobile app files to root
+      - name: Move app files to root
         run: |
           ls -lah
           shopt -s dotglob
