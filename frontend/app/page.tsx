@@ -329,7 +329,7 @@ export default function Home() {
           />
         </Form.Item>
         <Form.Item>
-          <Checkbox onChange={e => { setFields({...fields, download_diff_proj: e.target.checked}); }}>
+          <Checkbox onChange={e => { setFields({ ...fields, download_diff_proj: e.target.checked }); }}>
             Additionally download the diffed latex project as a tar file
           </Checkbox>
         </Form.Item>
@@ -362,9 +362,11 @@ export default function Home() {
         <Button type="primary" icon={<DownloadOutlined />} disabled={pdfURL.length === 0} target="_blank" href={pdfURL}>
           Download Diff PDF
         </Button>
-        <Button type="primary" icon={<DownloadOutlined />} disabled={zipURL.length === 0} download="diff_proj.tar" href={zipURL}>
-          Download Diff project TAR
-        </Button>
+        <Tooltip title="Select the download project option first.">
+          <Button type="primary" icon={<DownloadOutlined />} disabled={zipURL.length === 0} download="diff_proj.tar" href={zipURL}>
+            Download Diff project TAR
+          </Button>
+        </Tooltip>
       </Space>
 
       <Title level={3}>Docker Output</Title>
@@ -391,7 +393,10 @@ export default function Home() {
     </div>
   );
   return (
-    <div>
+    <div style={{
+      maxWidth: "600px",
+      margin: "0 auto",
+    }}>
       <Flex align="center" vertical>
         <Title><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
         <Text strong>An online tool based on <a target="_blank" href="https://github.com/ftilmann/latexdiff">latexdiff</a> and <a target="_blank" href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a>.</Text>

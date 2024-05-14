@@ -1,6 +1,8 @@
 
 ### TODO
 
+- 增加`--no-del`选项
+- web log 更多IP。修复一下https重定向到http的问题 https://stackoverflow.com/questions/35146187/nginx-gunicorn-python-flask-application-https-is-lost-on-redirect
 - 增加latexexpand测试用例？
 - 增加更多功能选项
   - UI：每个都截个图展示一下。
