@@ -10,15 +10,10 @@
     - 是否显示删除/删除的样式：颜色/线/脚标
     - 图表样式：框，颜色，图表是否展示删除的。
   - 小于多少词的修改不显示
-  - 是否显示引用
-- 返回整个diff项目的功能：docker exec + 流式传输https://izmailoff.github.io/web/flask-file-streaming/
 - cloudflare验证码保护一下？再说吧
-
-
-- 制作B站视频宣传
-- Youtube视频宣传
-- twitter宣传
-- reddit宣传
-- https://gitlab.com/git-latexdiff/git-latexdiff 的issue里宣传
-- https://github.com/ftilmann/latexdiff 宣传？
-- v2ex宣传，链接放到readme。
+- 前端样式修改：
+  - 更明显地展示源码链接
+  - 进度条默认隐藏，仅显示status。
+  - 增加一个按钮仅生成reproduction命令？
+- 给如何修改下载的diff的project加个教程。
+- Giscuz那边宣传。

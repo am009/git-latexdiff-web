@@ -1,28 +1,37 @@
-# Git-latexdiff web
+# Git-latexdiff web ([latexdiff.cn](https://latexdiff.cn))
 
 Keywords: latexdiff latex diff web online pdfdiff
 
 An web interface for [git-latexdiff](https://gitlab.com/git-latexdiff/git-latexdiff) (which is eventually based on [latexdiff](https://github.com/ftilmann/latexdiff)). 
 
-- Easy to Use: The input is two overleaf project zip file.
-- Run your own backend: You can run and use your own backend, no file is sent to any remote server.
-- Ready for paper submission: TODO
+- Easy to Use: The input is two overleaf project zip file. Support multiple tex file project (using `\input` or `\input`)
+- Use it online or offline: You can run offline, no file is sent to any remote server.
+- Ready for paper submission:
+  - Only show new text.
+  - Skip simple tex error: Only show diff text above a length threshold (TODO).
+  - Download the diffed project and modify it!
 
 ## Use it online!
 
-- Run your own API endpoint: You can run your own backend for better data security.
-- Use the provided default API endpoint: All uploaded files will be deleted and not preserved.
+Visit [latexdiff.cn](https://latexdiff.cn) !
+
+- Use the provided default API endpoint: All uploaded files will be deleted and not preserved. No file will be preserved to save some disk space.
+- Run your own API endpoint: You can run your own backend and still use the web interface. No file is uploaded to the internet. See below for details.
 
 (P.S. I'm excited to provide my first public service to the whole internet. Any issue related to the public API endpoint is also welcomed.)
 
-## Run the web backend
+## Use it offline 
+
+### Method 1: Run the web backend
 
 ```
 docker pull am009/latexdiff-web-worker && \
 docker run -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp --name latexdiff-backend -d am009/latexdiff-web-backend
 ```
 
-## Use as a command line tool
+If your backend uses http, then you also need to use the [http version of the frontend](http://latexdiff.cn).
+
+## Method 2: Use as a command-line tool
 
 Create a folder with the following three files:
 
@@ -49,7 +58,7 @@ Then you will get the following file structure:
     - `new-main-fl.tex`: expanded new project tex.
   - `git`: the git repo containing two commit for `git latexdiff` command.
 
-## Workflow
+## Technical Details
 
 **Worker**
 
@@ -68,7 +77,7 @@ The web app is a simple web interface for the docker.
 - To save storage space and keep user's privacy, everything (files and the docker container) is deleted.
 - If any error occurs, the output, and the command line to reproduce the run is returned to the user.
 
-## Debug worker
+## Debug the worker
 
 You can specify `-e DEBUG=1` to the docker run command, and the pdf diff will be generated to a git latexdiff temp folder (e.g., `git-latexdiff.2026`).
 
@@ -76,9 +85,9 @@ You can specify `-e DEBUG=1` to the docker run command, and the pdf diff will be
 
 Because unknown options for `git latexdiff` will be passed to `latexdiff`, so both tools' options can be specified in `other options`.
 
-[**latexdiff manual**](http://texdoc.net/texmf-dist/doc/support/latexdiff/doc/latexdiff-man.pdf)
+[**latexdiff manual**](http://texdoc.net/texmf-dist/doc/support/latexdiff/doc/latexdiff-man.pdf) is really useful.
 
-**options for latexdiff**
+**latexdiff's options**
 
 ```
 Usage: /usr/bin/latexdiff [options] old.tex new.tex > diff.tex
@@ -338,7 +347,7 @@ the API should be considered less stable than for the other options.
                        (option --only-changes of latexdiff-vc).
 ```
 
-**options for git latexdiff**
+**git-latexdiff's options**
 
 ```
 Usage: git latexdiff [options] OLD [NEW]

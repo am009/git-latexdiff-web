@@ -18,7 +18,7 @@ import Flex from 'antd/es/flex';
 
 import Giscus from './giscus';
 import { useState, useEffect } from 'react';
-import { Form } from 'antd';
+import { Divider, Form } from 'antd';
 import { Color } from 'antd/es/color-picker';
 import { ColorFactory } from 'antd/es/color-picker/color';
 import message from 'antd/es/message';
@@ -219,6 +219,53 @@ export default function Home() {
     let c = color.toRgb();
     return [c.r, c.g, c.b];
   }
+  let customStyle = (<div>
+    <Divider>Custom Style Options</Divider>
+    <Form.Item hidden={style !== 'custom'}>
+      <Checkbox defaultChecked onChange={val => setNewTextNull(!val.target.checked)}>Show new text</Checkbox>
+      <Checkbox disabled={!isNewTextVisible()} onChange={val => setNewColorNull(!val.target.checked)} defaultChecked>Change Color</Checkbox>
+      <ColorPicker disabled={!isNewTextVisible() || newColorNull} disabledAlpha value={newTextColor} showText onChange={
+        (color, hex) => {
+          setNewTextColor(color);
+        }
+      } />
+
+      <span>Text style: </span>
+      <Select
+        disabled={!isNewTextVisible()}
+        value={newTextStyle}
+        style={{ width: 120 }}
+        onChange={value => setNewTextStyle(value)}
+        options={[
+          { value: 'none', label: 'none' },
+          { value: 'underline_wave', label: 'underline_wave' },
+          { value: 'strikeout', label: 'strikeout' },
+        ]}
+      />
+    </Form.Item>
+    <Form.Item hidden={style !== 'custom'}>
+      <Checkbox defaultChecked onChange={val => setOldTextNull(!val.target.checked)}>Show removed text</Checkbox>
+      <Checkbox disabled={!isOldTextVisible()} onChange={val => setOldColorNull(!val.target.checked)} defaultChecked>Change Color to</Checkbox>
+      <ColorPicker disabled={!isOldTextVisible() || oldColorNull} disabledAlpha value={oldTextColor} showText onChange={
+        (color: Color, hex) => {
+          setOldTextColor(color);
+        }
+      } />
+      <span>Text style: </span>
+      <Select
+        disabled={!isOldTextVisible()}
+        value={oldTextStyle}
+        style={{ width: 120 }}
+        onChange={value => setOldTextStyle(value)}
+        options={[
+          { value: 'none', label: 'none' },
+          { value: 'underline_wave', label: 'underline_wave' },
+          { value: 'strikeout', label: 'strikeout' },
+        ]}
+      />
+    </Form.Item>
+    <Divider />
+  </div>)
   let form = (
     <div>
       <Form layout="horizontal" onFinish={onFinish} onFinishFailed={onFinishFailed}>
@@ -250,7 +297,6 @@ export default function Home() {
         <Form.Item label="Other git-latexdiff options:">
           <Input value={fields.other_cmdlines} onChange={e => setFields({ ...fields, other_cmdlines: e.target.value })} />
         </Form.Item>
-
         <Form.Item label="Diff text style:">
           <Select
             defaultValue="custom"
@@ -273,49 +319,7 @@ export default function Home() {
             ]}
           />
         </Form.Item>
-        <Form.Item hidden={style !== 'custom'}>
-          <Checkbox defaultChecked onChange={val => setNewTextNull(!val.target.checked)}>Show new text</Checkbox>
-          <Checkbox disabled={!isNewTextVisible()} onChange={val => setNewColorNull(!val.target.checked)} defaultChecked>Change Color</Checkbox>
-          <ColorPicker disabled={!isNewTextVisible() || newColorNull} disabledAlpha value={newTextColor} showText onChange={
-            (color, hex) => {
-              setNewTextColor(color);
-            }
-          } />
-
-          <span>Text style: </span>
-          <Select
-            disabled={!isNewTextVisible()}
-            value={newTextStyle}
-            style={{ width: 120 }}
-            onChange={value => setNewTextStyle(value)}
-            options={[
-              { value: 'none', label: 'none' },
-              { value: 'underline_wave', label: 'underline_wave' },
-              { value: 'strikeout', label: 'strikeout' },
-            ]}
-          />
-        </Form.Item>
-        <Form.Item hidden={style !== 'custom'}>
-          <Checkbox defaultChecked onChange={val => setOldTextNull(!val.target.checked)}>Show removed text</Checkbox>
-          <Checkbox disabled={!isOldTextVisible()} onChange={val => setOldColorNull(!val.target.checked)} defaultChecked>Change Color to</Checkbox>
-          <ColorPicker disabled={!isOldTextVisible() || oldColorNull} disabledAlpha value={oldTextColor} showText onChange={
-            (color: Color, hex) => {
-              setOldTextColor(color);
-            }
-          } />
-          <span>Text style: </span>
-          <Select
-            disabled={!isOldTextVisible()}
-            value={oldTextStyle}
-            style={{ width: 120 }}
-            onChange={value => setOldTextStyle(value)}
-            options={[
-              { value: 'none', label: 'none' },
-              { value: 'underline_wave', label: 'underline_wave' },
-              { value: 'strikeout', label: 'strikeout' },
-            ]}
-          />
-        </Form.Item>
+        {style !== 'custom' ? (<div></div>) : customStyle}
         <Form.Item label="Bibliography">
           <Select
             value={fields.bib}
@@ -399,7 +403,8 @@ export default function Home() {
     }}>
       <Flex align="center" vertical>
         <Title><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
-        <Text strong>An online tool based on <a target="_blank" href="https://github.com/ftilmann/latexdiff">latexdiff</a> and <a target="_blank" href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a>.</Text>
+        <Text strong>An online tool based on <a target="_blank" href="https://github.com/ftilmann/latexdiff">latexdiff</a> and <a target="_blank" href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a></Text>
+        <Text strong> <a target="_blank" href="https://github.com/am009/git-latexdiff-web">Source code on Github</a> / <a target="_blank" href="https://github.com/am009/git-latexdiff-web">Use it offline</a></Text>
       </Flex>
       <br />
 
