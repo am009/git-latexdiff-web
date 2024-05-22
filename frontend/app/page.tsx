@@ -278,7 +278,7 @@ export default function Home() {
           label="Old version of zip project downloaded from Overleaf:"
           rules={[{ required: true, message: 'Please select old project zip file!' }]}>
           <Upload beforeUpload={() => false} maxCount={1} accept='zip,application/zip,application/x-zip,application/x-zip-compressed'>
-            <Button icon={<UploadOutlined />}>Select New Latex zip project</Button>
+            <Button icon={<UploadOutlined />}>Select Old Latex zip project</Button>
           </Upload>
         </Form.Item>
         <Form.Item required name="new_zip"
@@ -287,7 +287,7 @@ export default function Home() {
           label="New version of zip project downloaded from Overleaf:"
           rules={[{ required: true, message: 'Please select new project zip file!' }]}>
           <Upload beforeUpload={() => false} maxCount={1} accept='zip,application/zip,application/x-zip,application/x-zip-compressed'>
-            <Button icon={<UploadOutlined />}>Select Old Latex zip project</Button>
+            <Button icon={<UploadOutlined />}>Select New Latex zip project</Button>
           </Upload>
         </Form.Item>
         <Form.Item label="Main tex filename:">

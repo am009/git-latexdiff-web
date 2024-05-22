@@ -1,6 +1,9 @@
 
 # First introduction video
 
+- Title:
+  - 【latexdiff.cn】一键生成pdf，展示latex项目修改
+  - [latexdiff.cn] Generate a pdf showing the changes of latex projects online!
 - publication: Youtube(Chinese and English version) Bilibili (Chinese version)
 - advertisement：
   - English: Reddit, twitter
