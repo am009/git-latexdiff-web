@@ -22,6 +22,7 @@ import { Divider, Form } from 'antd';
 import { Color } from 'antd/es/color-picker';
 import { ColorFactory } from 'antd/es/color-picker/color';
 import message from 'antd/es/message';
+import DiffEditor from './editor';
 const { Option } = Select;
 
 export default function Home() {
@@ -33,7 +34,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [sendProgress, setSendProgress] = useState(1);
   const [receiveProgress, setReceiveProgress] = useState(1);
-  const [currentTab, setCurrentTab] = useState("1");
+  const [currentTab, setCurrentTab] = useState("editor");
   const [currentScheme, setCurrentScheme] = useState("https://");
   const selectBefore = (
     <Tooltip title="Cannot mix http/https. Please change this page's URL scheme and refresh.">
@@ -154,7 +155,7 @@ export default function Home() {
     setDockerOut('');
     setPdfURL('');
     setZipURL('');
-    setCurrentTab("2");
+    setCurrentTab("result");
 
     const xhr = new XMLHttpRequest();
     xhr.upload.addEventListener("progress", (event) => {
@@ -267,7 +268,10 @@ export default function Home() {
     <Divider />
   </div>)
   let form = (
-    <div>
+    <div style={{
+      maxWidth: "600px",
+      margin: "0 auto",
+    }}>
       <Form layout="horizontal" onFinish={onFinish} onFinishFailed={onFinishFailed}>
         <Form.Item label="API Endpoint:">
           <Input addonBefore={selectBefore} suffix="/latexdiff" value={fields.api_endpoint} onChange={e => setFields({ ...fields, api_endpoint: e.target.value })} />
@@ -344,7 +348,10 @@ export default function Home() {
     </div>
   );
   let result = (
-    <div>
+    <div style={{
+      maxWidth: "600px",
+      margin: "0 auto",
+    }}>
       <Title level={3}>Request Progress</Title>
       <Paragraph strong>
         <ul>
@@ -396,11 +403,9 @@ export default function Home() {
 
     </div>
   );
+  let editor = (<div><DiffEditor /></div>)
   return (
-    <div style={{
-      maxWidth: "600px",
-      margin: "0 auto",
-    }}>
+    <div>
       <Flex align="center" vertical>
         <Title><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
         <Text strong>An online tool based on <a target="_blank" href="https://github.com/ftilmann/latexdiff">latexdiff</a> and <a target="_blank" href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a></Text>
@@ -413,23 +418,29 @@ export default function Home() {
         centered
         onChange={(key) => setCurrentTab(key)}
         items={[
-          { label: "Main", key: "1", children: form },
-          { label: "Result", key: "2", children: result },
+          { label: "Editor", key: "editor", children: editor },
+          { label: "Settings", key: "settings", children: form },
+          { label: "Result", key: "result", children: result },
         ]}
       />
       <br />
-      <Giscus
-        id="comments"
-        repo="am009/git-latexdiff-web"
-        repoId="R_kgDOKDZDvQ"
-        category="Giscus"
-        categoryId="DIC_kwDOKDZDvc4CfHLj"
-        mapping="pathname"
-        reactionsEnabled="1"
-        emitMetadata="0"
-        inputPosition="top"
-        theme="preferred_color_scheme"
-        lang="en" />
+      <div style={{
+        maxWidth: "600px",
+        margin: "0 auto",
+      }}>
+        <Giscus
+          id="comments"
+          repo="am009/git-latexdiff-web"
+          repoId="R_kgDOKDZDvQ"
+          category="Giscus"
+          categoryId="DIC_kwDOKDZDvc4CfHLj"
+          mapping="pathname"
+          reactionsEnabled="1"
+          emitMetadata="0"
+          inputPosition="top"
+          theme="preferred_color_scheme"
+          lang="en" />
+      </div>
     </div>
   );
 }
