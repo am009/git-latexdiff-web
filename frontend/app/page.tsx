@@ -34,7 +34,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [sendProgress, setSendProgress] = useState(1);
   const [receiveProgress, setReceiveProgress] = useState(1);
-  const [currentTab, setCurrentTab] = useState("editor");
+  const [currentTab, setCurrentTab] = useState("settings");
   const [currentScheme, setCurrentScheme] = useState("https://");
   const selectBefore = (
     <Tooltip title="Cannot mix http/https. Please change this page's URL scheme and refresh.">
@@ -403,22 +403,23 @@ export default function Home() {
 
     </div>
   );
+  let title = (
+  <Flex align="center" vertical>
+    <Title style={{ fontSize: "19pt", marginTop: 0, marginBottom: 0 }}><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
+  </Flex>);
   let editor = (<div><DiffEditor /></div>)
 
-  let next = (<Button icon={<RightOutlined />} type='primary'> Next </Button>)
+  let next = currentTab === 'editor' ? (<Button icon={<RightOutlined />} type='primary' onClick={() => setCurrentTab("settings")}> Next </Button>) : null
   return (
     <div>
-      <Flex align="center" vertical>
-        <Title style={{ fontSize: "19pt" }}><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
-      </Flex>
       <Tabs
         activeKey={currentTab}
         size="small"
         centered
         onChange={(key) => setCurrentTab(key)}
-        tabBarExtraContent={{right: next}}
+        tabBarExtraContent={{ left: title, right: next }}
         items={[
-          { label: "Editor", key: "editor", children: editor },
+          { label: "Editor", key: "editor", children: editor, forceRender: false },
           { label: "Settings", key: "settings", children: form },
           { label: "Result", key: "result", children: result },
         ]}
@@ -442,7 +443,7 @@ export default function Home() {
           mapping="pathname"
           reactionsEnabled="1"
           emitMetadata="0"
-          inputPosition="top"
+          inputPosition="bottom"
           theme="preferred_color_scheme"
           lang="en" />
       </div>
