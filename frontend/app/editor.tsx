@@ -9,26 +9,27 @@ import {
 } from 'fflate';
 import { useState, useEffect } from 'react';
 import { InboxOutlined } from '@ant-design/icons';
-import type { DiffChangeHandler } from 'react-monaco-editor';
+import type { ChangeHandler, MonacoDiffEditorProps } from './monaco';
 import type { UploadProps } from 'antd';
 import Text from "antd/es/typography/Text";
+import { saveAs } from 'file-saver';
+
+// import MonacoDiffEditor from './monaco';
+import dynamic from "next/dynamic";
+const MonacoDiffEditor = dynamic(() => import("./monaco"), {
+  ssr: false,
+});
 
 const { Header, Footer, Sider, Content } = Layout;
 const { Dragger } = Upload;
-
-import dynamic from "next/dynamic";
-const MonacoDiffEditor = dynamic(() => import("react-monaco-editor/lib/diff"), {
-  ssr: false,
-});
 
 export default function DiffEditor() {
   const [oldProjectFilename, setOldProjectFilename] = useState("")
   const [newProjectFilename, setNewProjectFilename] = useState("")
   const [oldTreeData, setOldTreeData] = useState<Unzipped | null>(null)
   const [newTreeData, setNewTreeData] = useState<Unzipped | null>(null)
-  const onOldChange: DiffChangeHandler = (value, event) => {
-    console.log(value, event);
-  }
+  const [selectedKey, setSelectedKey] = useState('')
+
   const makeOrGetDir = (children: TreeDataNode[], key: string, name: string) => {
     const node = children.find((child) => child.title === name)
     if (node) {
@@ -72,29 +73,32 @@ export default function DiffEditor() {
   const uploadPropsOld: UploadProps = {
     onChange(info) {
       message.info(`Processing: ${info.file.name}`, 1.5);
-      setOldProjectFilename(info.file.name);
       info.fileList[0].originFileObj?.arrayBuffer().then((buffer) => {
         unzip(new Uint8Array(buffer), (err, unzipped) => {
-          if (err) { message.error(`Unzip file ${info.file.name} failed.`); }
-          console.log(unzipped);
-          setOldTreeData(unzipped);
+          if (err) {
+            message.error(`Unzip file ${info.file.name} failed.`)
+          } else {
+            // console.log(unzipped);
+            setOldProjectFilename(info.file.name)
+            setOldTreeData(unzipped);
+          }
         });
       }).catch((err) => {
-        message.error(`Read file ${info.file.name} failed.`);
+        message.error(`Read file ${info.file.name} failed.`)
       });
     }
   }
   const uploadPropsNew: UploadProps = {
     onChange(info) {
       message.success(`${info.file.name}`);
-      setNewProjectFilename(info.file.name);
       info.fileList[0].originFileObj?.arrayBuffer().then((buffer) => {
         unzip(new Uint8Array(buffer), (err, unzipped) => {
           if (err) {
             message.error(`Unzip file ${info.file.name} failed.`);
           } else {
-            console.log(unzipped);
-            setNewTreeData(unzipped);
+            // console.log(unzipped)
+            setNewProjectFilename(info.file.name)
+            setNewTreeData(unzipped)
           }
         });
       }).catch((err) => {
@@ -103,26 +107,55 @@ export default function DiffEditor() {
     }
   }
 
-  const onSelectOld: TreeProps['onSelect'] = (selectedKeys, info) => {
-    console.log('selected', selectedKeys, info);
-  };
-  const onSelectNew: TreeProps['onSelect'] = (selectedKeys, info) => {
-    console.log('selected', selectedKeys, info);
-  };
-  const code1 = "// your original code...";
-  const code2 = "// a different version...";
+  const onSelectTree: TreeProps['onSelect'] = (selectedKeys, info) => {
+    if (selectedKeys.length === 0) {
+      setSelectedKey('')
+    } else {
+      setSelectedKey(selectedKeys[0] as string)
+    }
+  }
+  const hasFileData = (zip: Unzipped | null, key: string) => { return zip !== null && key.length > 0 && zip[key] !== undefined }
+  const getTreeData = (zip: Unzipped | null, key: string) => { return hasFileData(zip, key) ? new TextDecoder().decode((zip as Unzipped)[key]) : '' }
+  const original = getTreeData(oldTreeData, selectedKey)
+  const modified = getTreeData(newTreeData, selectedKey)
+  const onOldChange: ChangeHandler = (value, event) => {
+    if (hasFileData(oldTreeData, selectedKey)) {
+      (oldTreeData as Unzipped)[selectedKey] = new TextEncoder().encode(value)
+    }
+  }
+  const onNewChange: ChangeHandler = (value, event) => {
+    if (hasFileData(newTreeData, selectedKey)) {
+      (newTreeData as Unzipped)[selectedKey] = new TextEncoder().encode(value)
+    }
+  }
+  const downloadZip = (zipFile: Unzipped | null, filename: string) => {
+    if (zipFile === null) { return }
+    zip(zipFile, {
+      // The options object is still optional, you can still do just
+      // zip(archive, callback)
+      level: 0
+    }, (err, data) => {
+      if (err) {
+        message.error(`Create zip file failed.`);
+      } else {
+        const blob = new Blob([data], { type: 'application/zip' })
+        // window.open(URL.createObjectURL(blob), '_blank');
+        saveAs(blob, filename, { autoBom: false })
+      }
+    })
+  }
   const options = {
     renderSideBySide: true,
     automaticLayout: true,
     originalEditable: true
-  };
+  }
 
   const commonProps: UploadProps = {
     beforeUpload: () => false,
     maxCount: 1,
     accept: 'zip,application/zip,application/x-zip,application/x-zip-compressed',
     multiple: false,
-  };
+  }
 
   const UploadWindow = () => (<>
     <Row>
@@ -160,16 +193,17 @@ export default function DiffEditor() {
           showLine
           switcherIcon={<DownOutlined />}
           defaultExpandedKeys={['0-0-0']}
-          onSelect={onSelectOld}
+          onSelect={onSelectTree}
           treeData={convertZipToTree(oldTreeData, newTreeData)}
         />
       </Sider>
       <Content>
         <MonacoDiffEditor
-          original={code1}
-          value={code2}
+          original={original}
+          modified={modified}
           options={options}
-          onChange={onOldChange}
+          onOldChange={onOldChange}
+          onNewChange={onNewChange}
         // height={'70vh'}
         />
       </Content>
@@ -178,22 +212,21 @@ export default function DiffEditor() {
           showLine
           switcherIcon={<DownOutlined />}
           defaultExpandedKeys={['0-0-0']}
-          onSelect={onSelectNew}
+          onSelect={onSelectTree}
           treeData={convertZipToTree(newTreeData, oldTreeData)}
         />
       </Sider>
     </Layout>
     <Row>
       <Col span={12} style={{ display: 'flex', justifyContent: 'center' }}>
-        <Button icon={<DownloadOutlined />} download="todo.zip">
-          Save as ZIP
+        <Button icon={<DownloadOutlined />} onClick={() => { downloadZip(oldTreeData, oldProjectFilename) }}>
+          Save
         </Button>
       </Col>
       <Col span={12} style={{ display: 'flex', justifyContent: 'center' }}>
-        <Button icon={<DownloadOutlined />} download="todo.zip">
-          Save as ZIP
+        <Button icon={<DownloadOutlined />} onClick={() => { downloadZip(newTreeData, newProjectFilename) }}>
+          Save
         </Button>
-
       </Col>
     </Row>
   </>)
@@ -207,9 +240,7 @@ export default function DiffEditor() {
         <Text style={{ fontSize: "12pt" }}>New Project</Text>
       </Col>
     </Row>
-    {/* {oldProjectFilename.length > 0 && oldProjectFilename.length > 0 ? <DiffWindow /> : <UploadWindow />} */}
-    <DiffWindow />
-    <br />
-    <UploadWindow />
+    {oldTreeData !== null && newTreeData !== null ? <DiffWindow /> : <UploadWindow />}
+    {/* <DiffWindow /> <br /> <UploadWindow /> */}
   </>);
 }

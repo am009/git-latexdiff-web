@@ -17,3 +17,8 @@
   - 增加一个按钮仅生成reproduction命令？
 - 给如何修改下载的diff的project加个教程。
 - Giscuz那边宣传。
+
+#### 2024年7月18日
+
+- lazy loading? 看看对不对
+- 和Setting界面同步old/new project。单向同步也行吧
