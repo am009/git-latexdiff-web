@@ -17,7 +17,7 @@ import Space from 'antd/es/space';
 import Flex from 'antd/es/flex';
 
 import Giscus from './giscus';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Divider, Form } from 'antd';
 import { Color } from 'antd/es/color-picker';
 import { ColorFactory } from 'antd/es/color-picker/color';
@@ -26,6 +26,7 @@ import DiffEditor from './editor';
 const { Option } = Select;
 
 export default function Home() {
+  const submitButton = useRef<HTMLButtonElement | null>(null);
   const [dockerCmd, setDockerCmd] = useState("docker run --rm -v <path-to-folder>:/work am009/latexdiff-web-worker");
   const [configJson, setConfigJson] = useState("");
   const [pdfURL, setPdfURL] = useState("");
@@ -224,7 +225,7 @@ export default function Home() {
     <Divider>Custom Style Options</Divider>
     <Form.Item hidden={style !== 'custom'}>
       <Checkbox defaultChecked onChange={val => setNewTextNull(!val.target.checked)}>Show new text</Checkbox>
-      <Checkbox disabled={!isNewTextVisible()} onChange={val => setNewColorNull(!val.target.checked)} defaultChecked>Change Color</Checkbox>
+      <Checkbox disabled={!isNewTextVisible()} onChange={val => setNewColorNull(!val.target.checked)} defaultChecked>Change Color to:</Checkbox>
       <ColorPicker disabled={!isNewTextVisible() || newColorNull} disabledAlpha value={newTextColor} showText onChange={
         (color, hex) => {
           setNewTextColor(color);
@@ -246,7 +247,7 @@ export default function Home() {
     </Form.Item>
     <Form.Item hidden={style !== 'custom'}>
       <Checkbox defaultChecked onChange={val => setOldTextNull(!val.target.checked)}>Show removed text</Checkbox>
-      <Checkbox disabled={!isOldTextVisible()} onChange={val => setOldColorNull(!val.target.checked)} defaultChecked>Change Color to</Checkbox>
+      <Checkbox disabled={!isOldTextVisible()} onChange={val => setOldColorNull(!val.target.checked)} defaultChecked>Change Color to:</Checkbox>
       <ColorPicker disabled={!isOldTextVisible() || oldColorNull} disabledAlpha value={oldTextColor} showText onChange={
         (color: Color, hex) => {
           setOldTextColor(color);
@@ -330,7 +331,7 @@ export default function Home() {
             style={{ width: 200 }}
             onChange={value => { setFields({ ...fields, bib: value }); }}
             options={[
-              { value: 'none', label: 'don\'t show bib' },
+              { value: 'none', label: 'do not show bib' },
               { value: 'bibtex', label: 'bibtex' },
               { value: 'biber', label: 'biber' },
             ]}
@@ -342,7 +343,7 @@ export default function Home() {
           </Checkbox>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit"><UploadOutlined />Submit</Button>
+          <Button type="primary" htmlType="submit" ref={submitButton}><UploadOutlined />Submit</Button>
         </Form.Item>
       </Form>
     </div>
@@ -403,13 +404,21 @@ export default function Home() {
 
     </div>
   );
+
+  const doSubmit = () => {
+    if (submitButton.current) {
+      submitButton.current.click();
+    }
+  }
+  let submit2 = (<Button type="primary" disabled={currentTab !== 'settings'} onClick={() => { doSubmit() }}><UploadOutlined />Submit</Button>)
+  let next = (<Button icon={<RightOutlined />} type='primary' onClick={() => setCurrentTab("settings")}> Next </Button>);
   let title = (
-  <Flex align="center" vertical>
-    <Title style={{ fontSize: "19pt", marginTop: 0, marginBottom: 0 }}><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
-  </Flex>);
+    <Flex align="center" vertical>
+      <Title style={{ fontSize: "19pt", marginTop: 0, marginBottom: 0 }}><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
+    </Flex>);
   let editor = (<div><DiffEditor /></div>)
 
-  let next = currentTab === 'editor' ? (<Button icon={<RightOutlined />} type='primary' onClick={() => setCurrentTab("settings")}> Next </Button>) : null
+  let right = currentTab === 'editor' ? next : submit2
   return (
     <div>
       <Tabs
@@ -417,7 +426,7 @@ export default function Home() {
         size="small"
         centered
         onChange={(key) => setCurrentTab(key)}
-        tabBarExtraContent={{ left: title, right: next }}
+        tabBarExtraContent={{ left: title, right: right }}
         items={[
           { label: "Editor", key: "editor", children: editor, forceRender: false },
           { label: "Settings", key: "settings", children: form },

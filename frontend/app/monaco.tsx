@@ -1,6 +1,6 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 export type ChangeHandler = (
   value: string,
@@ -77,7 +77,7 @@ export default function MonacoDiffEditor(
         }
         if (onNewChange !== undefined) {
           const models = editor.current.getModel()
-          _oldSubscription.current = models?.modified.onDidChangeContent((event) => {
+          _newSubscription.current = models?.modified.onDidChangeContent((event) => {
             onNewChange(models?.modified.getValue(), event)
           });
         }
