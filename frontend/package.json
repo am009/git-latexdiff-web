@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/nextjs-registry": "^1.0.0",
     "@giscus/react": "^3.0.0",
     "antd": "5.16.5",
     "fflate": "^0.8.2",
@@ -28,6 +29,8 @@
     "eslint-config-next": "14.2.3",
     "monaco-editor-webpack-plugin": "^7.1.0",
     "style-loader": "^4.0.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-cli": "^5.1.4"
   }
 }

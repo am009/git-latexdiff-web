@@ -1,5 +1,9 @@
 "use client";
-import { UploadOutlined, LoadingOutlined, CheckCircleOutlined, DownloadOutlined, RightOutlined } from '@ant-design/icons';
+import UploadOutlined from '@ant-design/icons/lib/icons/UploadOutlined';
+import LoadingOutlined from '@ant-design/icons/lib/icons/LoadingOutlined';
+import CheckCircleOutlined from '@ant-design/icons/lib/icons/CheckCircleOutlined';
+import DownloadOutlined from '@ant-design/icons/lib/icons/DownloadOutlined';
+import RightOutlined from '@ant-design/icons/lib/icons/RightOutlined';
 import Text from "antd/es/typography/Text";
 import Title from "antd/es/typography/Title";
 import Button from 'antd/es/button/button';
@@ -15,14 +19,17 @@ import Checkbox from 'antd/es/checkbox/Checkbox';
 import Progress from 'antd/es/progress/progress';
 import Space from 'antd/es/space';
 import Flex from 'antd/es/flex';
+import Row from 'antd/es/row';
+import Col from 'antd/es/col';
+import Form from 'antd/es/form';
+import Divider from 'antd/es/divider';
+import { Color, ColorFactory } from 'antd/es/color-picker/color';
 
 import Giscus from './giscus';
-import { useState, useEffect, useRef } from 'react';
-import { Col, Divider, Form, Row } from 'antd';
-import { Color } from 'antd/es/color-picker';
-import { ColorFactory } from 'antd/es/color-picker/color';
 import message from 'antd/es/message';
 import DiffEditor from './editor';
+
+import { useState, useEffect, useRef } from 'react';
 const { Option } = Select;
 
 export default function Home() {
@@ -433,7 +440,7 @@ export default function Home() {
     <Flex align="center" vertical>
       <Title style={{ fontSize: "19pt", marginTop: 0, marginBottom: 0 }}><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
     </Flex>);
-  let editor = (<div><DiffEditor /></div>)
+  let editor = (<DiffEditor />)
 
   let right = currentTab === 'editor' ? next : submit2
   return (

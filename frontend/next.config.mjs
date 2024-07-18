@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
+// import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
+
+let port = 8888;
 
 const webpack = (
     config,
@@ -12,6 +15,9 @@ const webpack = (
         filename: "static/[name].worker.js",
       }));
     }
+    // if (isServer) {
+    //   config.plugins.push(new BundleAnalyzerPlugin({analyzerPort: ++port}));
+    // }
     config.module.rules.push({
       test: /\.ttf$/,
       type: 'asset/resource',

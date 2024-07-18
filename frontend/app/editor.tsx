@@ -1,31 +1,56 @@
-import { DownloadOutlined } from '@ant-design/icons';
-import { Button, Col, Layout, Row, Tree, message, Upload, Divider } from "antd";
-import { UploadOutlined, DownOutlined } from '@ant-design/icons';
-import type { TreeDataNode, TreeProps } from 'antd';
-import {
-  gzip, zlib, AsyncGzip, zip, unzip, strFromU8,
-  Zip, AsyncZipDeflate, Unzip, AsyncUnzipInflate,
-  Unzipped
-} from 'fflate';
-import { useState, useEffect, Key } from 'react';
-import { InboxOutlined, CheckOutlined, UndoOutlined } from '@ant-design/icons';
-import type { ChangeHandler, MonacoDiffEditorProps } from './monaco';
-import type { UploadProps } from 'antd';
+import DownloadOutlined from '@ant-design/icons/lib/icons/DownloadOutlined';
+import DownOutlined from '@ant-design/icons/lib/icons/DownOutlined';
+import InboxOutlined from '@ant-design/icons/lib/icons/InboxOutlined';
+import CheckOutlined from '@ant-design/icons/lib/icons/CheckOutlined';
+import UndoOutlined from '@ant-design/icons/lib/icons/UndoOutlined';
+import LoadingOutlined from '@ant-design/icons/lib/icons/LoadingOutlined';
+import Button from 'antd/es/button/button';
+import Row from 'antd/es/row';
+import Col from 'antd/es/col';
+import Upload from 'antd/es/upload/Upload';
+import Divider from 'antd/es/divider';
+import message from 'antd/es/message';
+import Tree from 'antd/es/tree';
+import Layout from 'antd/es/layout';
 import Text from "antd/es/typography/Text";
-import { saveAs } from 'file-saver';
+import Flex from "antd/es/flex";
+import Dragger from 'antd/es/upload/Dragger';
 const { DirectoryTree } = Tree;
 
+import { zip, unzip, Unzipped } from 'fflate/browser';
+import { useState, Key } from 'react';
+import { saveAs } from 'file-saver';
 
-// import MonacoDiffEditor from './monaco';
+import type { TreeDataNode, TreeProps, UploadFile } from 'antd';
+import type { UploadProps } from 'antd';
+import type { ChangeHandler } from './monaco';
+
 import dynamic from "next/dynamic";
 const MonacoDiffEditor = dynamic(() => import("./monaco"), {
   ssr: false,
+  loading: () => (
+  <Flex vertical justify='center' align='center'>
+    <span style={{fontSize: 'xxx-large'}}> <LoadingOutlined /> <br />  </span> Loading...
+  </Flex>)
 });
 
-const { Header, Footer, Sider, Content } = Layout;
-const { Dragger } = Upload;
+const { Sider, Content } = Layout;
 
-export default function DiffEditor() {
+export interface DiffEditorProps {
+  // oldFileTree: Unzipped | null,
+  // newFileTree: Unzipped | null,
+  /**
+   * An event emitted when tree data changed.
+   */
+  onOldTreeChange?: (data: Unzipped | null) => void;
+  onNewTreeChange?: (data: Unzipped | null) => void;
+}
+
+
+export default function DiffEditor({
+  onOldTreeChange,
+  onNewTreeChange,
+}: DiffEditorProps) {
   const [oldProjectFilename, setOldProjectFilename] = useState("")
   const [newProjectFilename, setNewProjectFilename] = useState("")
   const [oldTreeData, setOldTreeData] = useState<Unzipped | null>(null)
@@ -33,6 +58,17 @@ export default function DiffEditor() {
   const [selectedKey, setSelectedKey] = useState('')
   const [expandedKeysOld, setExpandedKeysOld] = useState<Key[]>([])
   const [expandedKeysNew, setExpandedKeysNew] = useState<Key[]>([])
+
+  const updateOld = (data: Unzipped | null, name: string) => {
+    setOldProjectFilename(name)
+    setOldTreeData(data)
+    onOldTreeChange?.(data)
+  }
+  const updateNew = (data: Unzipped | null, name: string) => {
+    setNewProjectFilename(name)
+    setNewTreeData(data)
+    onNewTreeChange?.(data)
+  }
 
   const makeOrGetDir = (children: TreeDataNode[], key: string, name: string) => {
     const node = children.find((child) => child.title === name)
@@ -66,7 +102,7 @@ export default function DiffEditor() {
         currentKey = t.key as string
         current = t.children as TreeDataNode[]
       }
-      if (dirs.length === 0 || dirs[dirs.length-1].length === 0) { continue }
+      if (dirs.length === 0 || dirs[dirs.length - 1].length === 0) { continue }
       const leaf: TreeDataNode = {
         title: dirs[dirs.length - 1],
         key: path,
@@ -79,6 +115,7 @@ export default function DiffEditor() {
   }
   const uploadPropsOld: UploadProps = {
     onChange(info) {
+      // console.log(`Processing: ${info.file.name}`, 1.5);
       message.info(`Processing: ${info.file.name}`, 1.5);
       info.fileList[0].originFileObj?.arrayBuffer().then((buffer) => {
         unzip(new Uint8Array(buffer), (err, unzipped) => {
@@ -86,8 +123,7 @@ export default function DiffEditor() {
             message.error(`Unzip file ${info.file.name} failed.`)
           } else {
             // console.log(unzipped);
-            setOldProjectFilename(info.file.name)
-            setOldTreeData(unzipped);
+            updateOld(unzipped, info.file.name)
           }
         });
       }).catch((err) => {
@@ -97,15 +133,14 @@ export default function DiffEditor() {
   }
   const uploadPropsNew: UploadProps = {
     onChange(info) {
-      message.success(`${info.file.name}`);
+      message.info(`Processing: ${info.file.name}`, 1.5);
       info.fileList[0].originFileObj?.arrayBuffer().then((buffer) => {
         unzip(new Uint8Array(buffer), (err, unzipped) => {
           if (err) {
             message.error(`Unzip file ${info.file.name} failed.`);
           } else {
             // console.log(unzipped)
-            setNewProjectFilename(info.file.name)
-            setNewTreeData(unzipped)
+            updateNew(unzipped, info.file.name)
           }
         });
       }).catch((err) => {
@@ -115,10 +150,13 @@ export default function DiffEditor() {
   }
 
   const onSelectTree: TreeProps['onSelect'] = (selectedKeys, info) => {
-    console.log('selected', selectedKeys, info);
     if (selectedKeys.length === 0) {
       setSelectedKey('')
     } else {
+      // selected folder
+      if (!hasFileData(oldTreeData, selectedKeys[0] as string) && !hasFileData(newTreeData, selectedKeys[0] as string)) {
+        return
+      }
       setSelectedKey(selectedKeys[0] as string)
     }
   }
@@ -214,7 +252,6 @@ export default function DiffEditor() {
           options={options}
           onOldChange={onOldChange}
           onNewChange={onNewChange}
-        // height={'70vh'}
         />
       </Content>
       <Sider width="15%" reverseArrow={true} collapsible={true} theme="light" collapsedWidth={0}>
@@ -229,16 +266,16 @@ export default function DiffEditor() {
         />
       </Sider>
     </Layout>
-    <Row style={{marginTop: "5px"}}>
-      <Col span={11} style={{ display: 'flex', justifyContent: 'center' }}>
+    <Row style={{ marginTop: "5px" }} justify="space-evenly" align="middle">
+      <Col>
         <Button icon={<DownloadOutlined />} onClick={() => { downloadZip(oldTreeData, oldProjectFilename) }}>
           Save
         </Button>
       </Col>
-      <Col span={2}>
-        <Button icon={<UndoOutlined />} onClick={() => {setNewTreeData(null); setNewProjectFilename(''); setOldTreeData(null); setOldProjectFilename(''); setSelectedKey('')}}>Reset</Button>
+      <Col>
+        <Button icon={<UndoOutlined />} onClick={() => { updateNew(null, ''); updateOld(null, ''); setSelectedKey('') }}>Reset</Button>
       </Col>
-      <Col span={11} style={{ display: 'flex', justifyContent: 'center' }}>
+      <Col>
         <Button icon={<DownloadOutlined />} onClick={() => { downloadZip(newTreeData, newProjectFilename) }}>
           Save
         </Button>

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
+import AntdRegistry from '@ant-design/nextjs-registry/lib/AntdRegistry';
 
 export const metadata: Metadata = {
   title: "Latexdiff-web",
@@ -15,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body><AntdRegistry>{children}</AntdRegistry></body>
     </html>
   );
 }

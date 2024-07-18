@@ -44,6 +44,8 @@ export default function MonacoDiffEditor(
   const editor = useRef<monaco.editor.IStandaloneDiffEditor | null>(null);
   const _oldSubscription = useRef<monaco.IDisposable | undefined>(undefined);
   const _newSubscription = useRef<monaco.IDisposable | undefined>(undefined);
+  const originalModel = useRef<monaco.editor.ITextModel | null>(null);
+  const modifiedModel = useRef<monaco.editor.ITextModel | null>(null);
 
   useEffect(
     () => {
@@ -51,39 +53,52 @@ export default function MonacoDiffEditor(
         if (editor.current !== null) {
           console.log("Error! editor object is not null! Skip initialization.");
           return
+        } else {
+          editor.current = monaco.editor.createDiffEditor(
+            containerElement.current,
+            options
+          );
         }
-        // Before initializing monaco editor
-        editor.current = monaco.editor.createDiffEditor(
-          containerElement.current,
-          options
-        );
-        // Initialize models.
-        const originalModel = monaco.editor.createModel(
-          original === undefined ? "" : original
-        );
-        const modifiedModel = monaco.editor.createModel(
-          modified === undefined ? "" : modified
-        );
+        const originalText = original === undefined ? "" : original;
+        if (originalModel.current === null) {
+          originalModel.current = monaco.editor.createModel(
+            originalText
+          );
+        } else {
+          originalModel.current.setValue(originalText);
+        }
+        
+        const modifiedText = modified === undefined ? "" : modified;
+        if (modifiedModel.current === null) {
+          modifiedModel.current = monaco.editor.createModel(
+            modifiedText
+          );
+        } else {
+          modifiedModel.current.setValue(modifiedText);
+        }
+
         editor.current.setModel({
-          original: originalModel,
-          modified: modifiedModel,
+          original: originalModel.current,
+          modified: modifiedModel.current,
         });
 
-        if (onOldChange !== undefined) {
+        // TODO: handle onOldChange and onNewChange change.
+        if (onOldChange !== undefined && _oldSubscription.current === undefined) {
           const models = editor.current.getModel()
           _oldSubscription.current = models?.original.onDidChangeContent((event) => {
             onOldChange(models?.original.getValue(), event)
           });
         }
-        if (onNewChange !== undefined) {
+        if (onNewChange !== undefined && _newSubscription.current === undefined) {
           const models = editor.current.getModel()
           _newSubscription.current = models?.modified.onDidChangeContent((event) => {
             onNewChange(models?.modified.getValue(), event)
           });
         }
+        return;
       }
     },
-    [],
+    [onOldChange, onNewChange, options, original, modified],
   );
 
   return (
