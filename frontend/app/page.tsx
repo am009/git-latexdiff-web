@@ -1,5 +1,5 @@
 "use client";
-import { UploadOutlined, LoadingOutlined, CheckCircleOutlined, DownloadOutlined } from '@ant-design/icons';
+import { UploadOutlined, LoadingOutlined, CheckCircleOutlined, DownloadOutlined, RightOutlined } from '@ant-design/icons';
 import Text from "antd/es/typography/Text";
 import Title from "antd/es/typography/Title";
 import Button from 'antd/es/button/button';
@@ -404,19 +404,19 @@ export default function Home() {
     </div>
   );
   let editor = (<div><DiffEditor /></div>)
+
+  let next = (<Button icon={<RightOutlined />} type='primary'> Next </Button>)
   return (
     <div>
       <Flex align="center" vertical>
-        <Title><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
-        <Text strong>An online tool based on <a target="_blank" href="https://github.com/ftilmann/latexdiff">latexdiff</a> and <a target="_blank" href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a></Text>
-        <Text strong> <a target="_blank" href="https://github.com/am009/git-latexdiff-web">Source code on Github</a> / <a target="_blank" href="https://github.com/am009/git-latexdiff-web">Use it offline</a></Text>
+        <Title style={{ fontSize: "19pt" }}><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
       </Flex>
-      <br />
-
       <Tabs
         activeKey={currentTab}
+        size="small"
         centered
         onChange={(key) => setCurrentTab(key)}
+        tabBarExtraContent={{right: next}}
         items={[
           { label: "Editor", key: "editor", children: editor },
           { label: "Settings", key: "settings", children: form },
@@ -428,6 +428,11 @@ export default function Home() {
         maxWidth: "600px",
         margin: "0 auto",
       }}>
+        <Flex align="center" vertical>
+          <Text strong><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a> is an online tool based on <a target="_blank" href="https://github.com/ftilmann/latexdiff">latexdiff</a> and <a target="_blank" href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a></Text>
+          <Text strong> <a target="_blank" href="https://github.com/am009/git-latexdiff-web">Source code on Github</a> / <a target="_blank" href="https://github.com/am009/git-latexdiff-web">Use it offline</a></Text>
+        </Flex>
+        <br />
         <Giscus
           id="comments"
           repo="am009/git-latexdiff-web"

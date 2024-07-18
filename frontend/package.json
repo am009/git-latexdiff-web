@@ -11,11 +11,11 @@
   "dependencies": {
     "@giscus/react": "^3.0.0",
     "antd": "5.16.5",
-    "monaco-editor-webpack-plugin": "^7.1.0",
+    "fflate": "^0.8.2",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
-    "react-monaco-editor": "^0.55.0"
+    "react-monaco-editor": "^0.54.0"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -25,6 +25,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.2.3",
     "style-loader": "^4.0.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "monaco-editor-webpack-plugin": "^7.1.0"
   }
 }
