@@ -18,7 +18,7 @@ import Flex from 'antd/es/flex';
 
 import Giscus from './giscus';
 import { useState, useEffect, useRef } from 'react';
-import { Divider, Form } from 'antd';
+import { Col, Divider, Form, Row } from 'antd';
 import { Color } from 'antd/es/color-picker';
 import { ColorFactory } from 'antd/es/color-picker/color';
 import message from 'antd/es/message';
@@ -224,47 +224,64 @@ export default function Home() {
   let customStyle = (<div>
     <Divider>Custom Style Options</Divider>
     <Form.Item hidden={style !== 'custom'}>
-      <Checkbox defaultChecked onChange={val => setNewTextNull(!val.target.checked)}>Show new text</Checkbox>
-      <Checkbox disabled={!isNewTextVisible()} onChange={val => setNewColorNull(!val.target.checked)} defaultChecked>Change Color to:</Checkbox>
-      <ColorPicker disabled={!isNewTextVisible() || newColorNull} disabledAlpha value={newTextColor} showText onChange={
-        (color, hex) => {
-          setNewTextColor(color);
-        }
-      } />
+      <Row justify="space-around" align="middle">
+        <Col>
+          <Checkbox defaultChecked onChange={val => setNewTextNull(!val.target.checked)} >Show new text</Checkbox>
+        </Col>
+        <Col>
+          <Checkbox disabled={!isNewTextVisible()} onChange={val => setNewColorNull(!val.target.checked)} defaultChecked>Change Color to:</Checkbox>
+        </Col>
 
-      <span>Text style: </span>
-      <Select
-        disabled={!isNewTextVisible()}
-        value={newTextStyle}
-        style={{ width: 120 }}
-        onChange={value => setNewTextStyle(value)}
-        options={[
-          { value: 'none', label: 'none' },
-          { value: 'underline_wave', label: 'underline_wave' },
-          { value: 'strikeout', label: 'strikeout' },
-        ]}
-      />
+        <Col>
+          <ColorPicker disabled={!isNewTextVisible() || newColorNull} disabledAlpha value={newTextColor} showText onChange={
+            (color, hex) => {
+              setNewTextColor(color);
+            }
+          } />
+        </Col>
+        <Col><span>Text style: </span>
+          <Select
+            disabled={!isNewTextVisible()}
+            value={newTextStyle}
+            style={{ verticalAlign: 'middle', width: 120 }}
+            onChange={value => setNewTextStyle(value)}
+            options={[
+              { value: 'none', label: 'none' },
+              { value: 'underline_wave', label: 'underline_wave' },
+              { value: 'strikeout', label: 'strikeout' },
+            ]}
+          /></Col>
+      </Row>
     </Form.Item>
     <Form.Item hidden={style !== 'custom'}>
-      <Checkbox defaultChecked onChange={val => setOldTextNull(!val.target.checked)}>Show removed text</Checkbox>
-      <Checkbox disabled={!isOldTextVisible()} onChange={val => setOldColorNull(!val.target.checked)} defaultChecked>Change Color to:</Checkbox>
-      <ColorPicker disabled={!isOldTextVisible() || oldColorNull} disabledAlpha value={oldTextColor} showText onChange={
-        (color: Color, hex) => {
-          setOldTextColor(color);
-        }
-      } />
-      <span>Text style: </span>
-      <Select
-        disabled={!isOldTextVisible()}
-        value={oldTextStyle}
-        style={{ width: 120 }}
-        onChange={value => setOldTextStyle(value)}
-        options={[
-          { value: 'none', label: 'none' },
-          { value: 'underline_wave', label: 'underline_wave' },
-          { value: 'strikeout', label: 'strikeout' },
-        ]}
-      />
+      <Row justify="space-around" align="middle">
+        <Col>
+          <Checkbox defaultChecked onChange={val => setOldTextNull(!val.target.checked)}>Show removed text</Checkbox>
+        </Col>
+        <Col>
+          <Checkbox disabled={!isOldTextVisible()} onChange={val => setOldColorNull(!val.target.checked)} defaultChecked>Change Color to:</Checkbox>
+        </Col>
+        <Col>
+          <ColorPicker disabled={!isOldTextVisible() || oldColorNull} disabledAlpha value={oldTextColor} showText onChange={
+            (color: Color, hex) => {
+              setOldTextColor(color);
+            }
+          } />
+        </Col>
+        <Col><span>Text style: </span>
+          <Select
+            disabled={!isOldTextVisible()}
+            value={oldTextStyle}
+            style={{ width: 120 }}
+            onChange={value => setOldTextStyle(value)}
+            options={[
+              { value: 'none', label: 'none' },
+              { value: 'underline_wave', label: 'underline_wave' },
+              { value: 'strikeout', label: 'strikeout' },
+            ]}
+          />
+        </Col>
+      </Row>
     </Form.Item>
     <Divider />
   </div>)
@@ -280,7 +297,7 @@ export default function Home() {
         <Form.Item required name="old_zip"
           valuePropName="fileList"
           getValueFromEvent={normFile}
-          label="Old version of zip project downloaded from Overleaf:"
+          label="Old project (.zip downloaded from Overleaf):"
           rules={[{ required: true, message: 'Please select old project zip file!' }]}>
           <Upload beforeUpload={() => false} maxCount={1} accept='zip,application/zip,application/x-zip,application/x-zip-compressed'>
             <Button icon={<UploadOutlined />}>Select Old Latex zip project</Button>
@@ -289,7 +306,7 @@ export default function Home() {
         <Form.Item required name="new_zip"
           valuePropName="fileList"
           getValueFromEvent={normFile}
-          label="New version of zip project downloaded from Overleaf:"
+          label="New project (.zip downloaded from Overleaf):"
           rules={[{ required: true, message: 'Please select new project zip file!' }]}>
           <Upload beforeUpload={() => false} maxCount={1} accept='zip,application/zip,application/x-zip,application/x-zip-compressed'>
             <Button icon={<UploadOutlined />}>Select New Latex zip project</Button>
@@ -339,7 +356,7 @@ export default function Home() {
         </Form.Item>
         <Form.Item>
           <Checkbox onChange={e => { setFields({ ...fields, download_diff_proj: e.target.checked }); }}>
-            Additionally download the diffed latex project as a tar file
+            Download the diff project (.tar)
           </Checkbox>
         </Form.Item>
         <Form.Item>

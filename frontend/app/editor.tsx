@@ -1,5 +1,5 @@
 import { DownloadOutlined } from '@ant-design/icons';
-import { Button, Col, Layout, Row, Tree, message, Upload } from "antd";
+import { Button, Col, Layout, Row, Tree, message, Upload, Divider } from "antd";
 import { UploadOutlined, DownOutlined } from '@ant-design/icons';
 import type { TreeDataNode, TreeProps } from 'antd';
 import {
@@ -7,12 +7,14 @@ import {
   Zip, AsyncZipDeflate, Unzip, AsyncUnzipInflate,
   Unzipped
 } from 'fflate';
-import { useState, useEffect } from 'react';
-import { InboxOutlined } from '@ant-design/icons';
+import { useState, useEffect, Key } from 'react';
+import { InboxOutlined, CheckOutlined, UndoOutlined } from '@ant-design/icons';
 import type { ChangeHandler, MonacoDiffEditorProps } from './monaco';
 import type { UploadProps } from 'antd';
 import Text from "antd/es/typography/Text";
 import { saveAs } from 'file-saver';
+const { DirectoryTree } = Tree;
+
 
 // import MonacoDiffEditor from './monaco';
 import dynamic from "next/dynamic";
@@ -29,6 +31,8 @@ export default function DiffEditor() {
   const [oldTreeData, setOldTreeData] = useState<Unzipped | null>(null)
   const [newTreeData, setNewTreeData] = useState<Unzipped | null>(null)
   const [selectedKey, setSelectedKey] = useState('')
+  const [expandedKeysOld, setExpandedKeysOld] = useState<Key[]>([])
+  const [expandedKeysNew, setExpandedKeysNew] = useState<Key[]>([])
 
   const makeOrGetDir = (children: TreeDataNode[], key: string, name: string) => {
     const node = children.find((child) => child.title === name)
@@ -53,6 +57,7 @@ export default function DiffEditor() {
       let current = root
       let currentKey = ''
       for (let i = 0; i < dirs.length - 1; i++) {
+        if (dirs[i].length === 0) { continue }
         const t = makeOrGetDir(current, currentKey.toString(), dirs[i])
         if (t.children === undefined) {
           message.error(`Folder and file name collision: ${t.key}.`)
@@ -61,10 +66,12 @@ export default function DiffEditor() {
         currentKey = t.key as string
         current = t.children as TreeDataNode[]
       }
+      if (dirs.length === 0 || dirs[dirs.length-1].length === 0) { continue }
       const leaf: TreeDataNode = {
         title: dirs[dirs.length - 1],
         key: path,
-        disabled: other !== null && other[path] === undefined
+        disabled: other !== null && other[path] === undefined,
+        isLeaf: true,
       }
       current.push(leaf)
     }
@@ -108,6 +115,7 @@ export default function DiffEditor() {
   }
 
   const onSelectTree: TreeProps['onSelect'] = (selectedKeys, info) => {
+    console.log('selected', selectedKeys, info);
     if (selectedKeys.length === 0) {
       setSelectedKey('')
     } else {
@@ -159,27 +167,27 @@ export default function DiffEditor() {
 
   const UploadWindow = () => (<>
     <Row>
-      <Col span={12} style={{ display: 'flex', justifyContent: 'center' }}>
+      <Col span={12}>
         <Dragger {...commonProps} {...uploadPropsOld}>
           <p className="ant-upload-drag-icon">
-            <InboxOutlined />
+            {oldTreeData === null ? <InboxOutlined /> : <CheckOutlined />}
           </p>
-          <p className="ant-upload-text">Click or drag file to this area to upload</p>
+          <p className="ant-upload-text">Old Project</p>
           <p className="ant-upload-hint">
-            Support for a single or bulk upload. Strictly prohibited from uploading company data or other
-            banned files.
+            Click or drag file to this area to upload. <br />
+            Support zip latex project. You can download from overleaf.
           </p>
         </Dragger>
       </Col>
-      <Col span={12} style={{ display: 'flex', justifyContent: 'center' }}>
+      <Col span={12}>
         <Dragger {...commonProps} {...uploadPropsNew}>
           <p className="ant-upload-drag-icon">
-            <InboxOutlined />
+            {newTreeData === null ? <InboxOutlined /> : <CheckOutlined />}
           </p>
-          <p className="ant-upload-text">Click or drag file to this area to upload</p>
+          <p className="ant-upload-text">New Project</p>
           <p className="ant-upload-hint">
-            Support for a single or bulk upload. Strictly prohibited from uploading company data or other
-            banned files.
+            Click or drag file to this area to upload. <br />
+            Support zip latex project. You can download from overleaf.
           </p>
         </Dragger>
       </Col>
@@ -189,12 +197,14 @@ export default function DiffEditor() {
   const DiffWindow = () => (<>
     <Layout>
       <Sider width="15%" collapsible={true} theme="light" collapsedWidth={0}>
-        <Tree
+        <DirectoryTree
           showLine
           switcherIcon={<DownOutlined />}
           defaultExpandedKeys={['0-0-0']}
           onSelect={onSelectTree}
           treeData={convertZipToTree(oldTreeData, newTreeData)}
+          expandedKeys={expandedKeysOld}
+          onExpand={(expandedKeys) => setExpandedKeysOld(expandedKeys)}
         />
       </Sider>
       <Content>
@@ -208,22 +218,27 @@ export default function DiffEditor() {
         />
       </Content>
       <Sider width="15%" reverseArrow={true} collapsible={true} theme="light" collapsedWidth={0}>
-        <Tree
+        <DirectoryTree
           showLine
           switcherIcon={<DownOutlined />}
           defaultExpandedKeys={['0-0-0']}
           onSelect={onSelectTree}
           treeData={convertZipToTree(newTreeData, oldTreeData)}
+          expandedKeys={expandedKeysNew}
+          onExpand={(expandedKeys) => setExpandedKeysNew(expandedKeys)}
         />
       </Sider>
     </Layout>
-    <Row>
-      <Col span={12} style={{ display: 'flex', justifyContent: 'center' }}>
+    <Row style={{marginTop: "5px"}}>
+      <Col span={11} style={{ display: 'flex', justifyContent: 'center' }}>
         <Button icon={<DownloadOutlined />} onClick={() => { downloadZip(oldTreeData, oldProjectFilename) }}>
           Save
         </Button>
       </Col>
-      <Col span={12} style={{ display: 'flex', justifyContent: 'center' }}>
+      <Col span={2}>
+        <Button icon={<UndoOutlined />} onClick={() => {setNewTreeData(null); setNewProjectFilename(''); setOldTreeData(null); setOldProjectFilename(''); setSelectedKey('')}}>Reset</Button>
+      </Col>
+      <Col span={11} style={{ display: 'flex', justifyContent: 'center' }}>
         <Button icon={<DownloadOutlined />} onClick={() => { downloadZip(newTreeData, newProjectFilename) }}>
           Save
         </Button>
@@ -240,6 +255,7 @@ export default function DiffEditor() {
         <Text style={{ fontSize: "12pt" }}>New Project</Text>
       </Col>
     </Row>
+    <Divider style={{ margin: "5px 0 10px 0" }} />
     {oldTreeData !== null && newTreeData !== null ? <DiffWindow /> : <UploadWindow />}
     {/* <DiffWindow /> <br /> <UploadWindow /> */}
   </>);
