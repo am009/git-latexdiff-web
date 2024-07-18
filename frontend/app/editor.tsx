@@ -29,9 +29,9 @@ import dynamic from "next/dynamic";
 const MonacoDiffEditor = dynamic(() => import("./monaco"), {
   ssr: false,
   loading: () => (
-  <Flex vertical justify='center' align='center'>
-    <span style={{fontSize: 'xxx-large'}}> <LoadingOutlined /> <br />  </span> Loading...
-  </Flex>)
+    <Flex vertical justify='center' align='center'>
+      <span style={{ fontSize: 'xxx-large' }}> <LoadingOutlined /> <br />  </span> Loading...
+    </Flex>)
 });
 
 const { Sider, Content } = Layout;
@@ -230,6 +230,9 @@ export default function DiffEditor({
         </Dragger>
       </Col>
     </Row>
+    <Flex style={{ marginTop: "5px" }} justify="space-evenly" align="middle">
+      <Button icon={<UndoOutlined />} onClick={() => { updateNew(null, ''); updateOld(null, ''); setSelectedKey('') }}>Reset</Button>
+    </Flex>
   </>)
 
   const DiffWindow = () => (<>

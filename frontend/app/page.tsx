@@ -24,15 +24,24 @@ import Col from 'antd/es/col';
 import Form from 'antd/es/form';
 import Divider from 'antd/es/divider';
 import { Color, ColorFactory } from 'antd/es/color-picker/color';
+import { zipSync, Unzipped } from 'fflate/browser';
 
 import Giscus from './giscus';
 import message from 'antd/es/message';
 import DiffEditor from './editor';
 
+import type { ValidateStatus } from 'antd/es/form/FormItem';
 import { useState, useEffect, useRef } from 'react';
 const { Option } = Select;
 
 export default function Home() {
+  const [oldValidateStatus, setOldValidateStatus] = useState<ValidateStatus>('')
+  const [newValidateStatus, setNewValidateStatus] = useState<ValidateStatus>('')
+  const [oldTreeData, setOldTreeData] = useState<Unzipped | null>(null)
+  const [newTreeData, setNewTreeData] = useState<Unzipped | null>(null)
+
+  const hasTreeData = oldTreeData !== null || newTreeData !== null
+
   const submitButton = useRef<HTMLButtonElement | null>(null);
   const [dockerCmd, setDockerCmd] = useState("docker run --rm -v <path-to-folder>:/work am009/latexdiff-web-worker");
   const [configJson, setConfigJson] = useState("");
@@ -144,12 +153,50 @@ export default function Home() {
       message.error("Failed to generate diff pdf.", 6);
     }
   }
+
+  const treeToFile = (tree: Unzipped) => {
+    const data = zipSync(tree, { level: 0 });
+    return new Blob([data], { type: 'application/zip' })
+  }
+
   // Submitting the form
   const onFinish = (values: any) => {
-    console.log("Success:", values);
+    console.log("Submit values:", values);
+    console.log("Tree values:", hasTreeData, oldTreeData, newTreeData);
+    if (hasTreeData) {
+      if (oldTreeData === null || newTreeData === null) {
+        message.error('Please select both old and new project zip file!')
+        setCurrentTab("editor");
+        return
+      }
+    } else {
+      setOldValidateStatus(values.old_zip === undefined || values.old_zip.length === 0 ? 'error' : '')
+      setNewValidateStatus(values.new_zip === undefined || values.new_zip.length === 0 ? 'error' : '')
+      if (values.old_zip === undefined) {
+        message.error('Please select old project zip file!')
+        return
+      }
+      if (values.new_zip === undefined) {
+        message.error('Please select new project zip file!')
+        return
+      }
+    }
+
+
     let form = new FormData();
-    form.append("old_zip", values.old_zip[0].originFileObj);
-    form.append("new_zip", values.new_zip[0].originFileObj);
+    if (hasTreeData) {
+      if (oldTreeData === null || newTreeData === null) {
+        message.error('Please select both old and new project zip file!')
+        setCurrentTab("editor");
+        return
+      }
+      form.append("old_zip", treeToFile(oldTreeData), "old.zip");
+      form.append("new_zip", treeToFile(newTreeData), "new.zip");
+    } else {
+      form.append("old_zip", values.old_zip[0].originFileObj);
+      form.append("new_zip", values.new_zip[0].originFileObj);
+    }
+
     let config = genConfig();
     setConfigJson(JSON.stringify(config));
     console.log("Current config:", config);
@@ -301,22 +348,26 @@ export default function Home() {
         <Form.Item label="API Endpoint:">
           <Input addonBefore={selectBefore} suffix="/latexdiff" value={fields.api_endpoint} onChange={e => setFields({ ...fields, api_endpoint: e.target.value })} />
         </Form.Item>
-        <Form.Item required name="old_zip"
+        <Form.Item validateStatus={oldValidateStatus}
+          tooltip={hasTreeData ? "Please upload in the Editor page." : undefined}
+          name="old_zip"
           valuePropName="fileList"
           getValueFromEvent={normFile}
           label="Old project (.zip downloaded from Overleaf):"
-          rules={[{ required: true, message: 'Please select old project zip file!' }]}>
-          <Upload beforeUpload={() => false} maxCount={1} accept='zip,application/zip,application/x-zip,application/x-zip-compressed'>
-            <Button icon={<UploadOutlined />}>Select Old Latex zip project</Button>
+          help={oldValidateStatus === 'error' ? "*Please select old project zip file!" : undefined}>
+          <Upload disabled={hasTreeData} beforeUpload={() => false} maxCount={1} accept='zip,application/zip,application/x-zip,application/x-zip-compressed'>
+            <Button disabled={hasTreeData} icon={<UploadOutlined />}>Select Old Latex zip project</Button>
           </Upload>
         </Form.Item>
-        <Form.Item required name="new_zip"
+        <Form.Item validateStatus={newValidateStatus}
+          tooltip={hasTreeData ? "Please upload in the Editor page." : undefined}
+          name="new_zip"
           valuePropName="fileList"
           getValueFromEvent={normFile}
           label="New project (.zip downloaded from Overleaf):"
-          rules={[{ required: true, message: 'Please select new project zip file!' }]}>
-          <Upload beforeUpload={() => false} maxCount={1} accept='zip,application/zip,application/x-zip,application/x-zip-compressed'>
-            <Button icon={<UploadOutlined />}>Select New Latex zip project</Button>
+          help={newValidateStatus === 'error' ? "*Please select new project zip file!" : undefined}>
+          <Upload disabled={hasTreeData} beforeUpload={() => false} maxCount={1} accept='zip,application/zip,application/x-zip,application/x-zip-compressed'>
+            <Button disabled={hasTreeData} icon={<UploadOutlined />}>Select New Latex zip project</Button>
           </Upload>
         </Form.Item>
         <Form.Item label="Main tex filename:">
@@ -440,7 +491,7 @@ export default function Home() {
     <Flex align="center" vertical>
       <Title style={{ fontSize: "19pt", marginTop: 0, marginBottom: 0 }}><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a></Title>
     </Flex>);
-  let editor = (<DiffEditor />)
+  let editor = (<DiffEditor onNewTreeChange={setNewTreeData} onOldTreeChange={setOldTreeData} />)
 
   let right = currentTab === 'editor' ? next : submit2
   return (
@@ -464,7 +515,7 @@ export default function Home() {
       }}>
         <Flex align="center" vertical>
           <Text strong><a href="https://github.com/am009/git-latexdiff-web">git-latexdiff web</a> is an online tool based on <a target="_blank" href="https://github.com/ftilmann/latexdiff">latexdiff</a> and <a target="_blank" href="https://gitlab.com/git-latexdiff/git-latexdiff">git-latexdiff</a></Text>
-          <Text strong> <a target="_blank" href="https://github.com/am009/git-latexdiff-web">Source code on Github</a> / <a target="_blank" href="https://github.com/am009/git-latexdiff-web">Use it offline</a></Text>
+          <Text strong> <a target="_blank" href="https://github.com/am009/git-latexdiff-web">Source code on Github</a> / <a target="_blank" href="https://github.com/am009/git-latexdiff-web?tab=readme-ov-file#use-it-offline">Use it offline</a></Text>
         </Flex>
         <br />
         <Giscus
