@@ -4,6 +4,8 @@ import InboxOutlined from '@ant-design/icons/lib/icons/InboxOutlined';
 import CheckOutlined from '@ant-design/icons/lib/icons/CheckOutlined';
 import UndoOutlined from '@ant-design/icons/lib/icons/UndoOutlined';
 import LoadingOutlined from '@ant-design/icons/lib/icons/LoadingOutlined';
+import LeftOutlined from '@ant-design/icons/lib/icons/LeftOutlined';
+import RightOutlined from '@ant-design/icons/lib/icons/RightOutlined';
 import Button from 'antd/es/button/button';
 import Row from 'antd/es/row';
 import Col from 'antd/es/col';
@@ -193,7 +195,9 @@ export default function DiffEditor({
   const options = {
     renderSideBySide: true,
     automaticLayout: true,
-    originalEditable: true
+    originalEditable: true,
+    renderGutterMenu: false,
+    // onlyShowAccessibleDiffViewer: true,
   }
 
   const commonProps: UploadProps = {
@@ -235,9 +239,12 @@ export default function DiffEditor({
     </Flex>
   </>)
 
-  const DiffWindow = () => (<>
+  const DiffWindow = () => {
+    const [leftCollapsed, setLeftCollapsed] = useState(false)
+    const [rightCollapsed, setRightCollapsed] = useState(false)
+    return (<>
     <Layout>
-      <Sider width="15%" collapsible={true} theme="light" collapsedWidth={0}>
+      <Sider width="15%" collapsed={leftCollapsed} collapsible={true} trigger={null} theme="light" collapsedWidth={0}>
         <DirectoryTree
           showLine
           switcherIcon={<DownOutlined />}
@@ -248,6 +255,13 @@ export default function DiffEditor({
           onExpand={(expandedKeys) => setExpandedKeysOld(expandedKeys)}
         />
       </Sider>
+      <Flex onClick={() => { setLeftCollapsed(!leftCollapsed) }} style={{
+        width: "14px", cursor: "pointer", backgroundColor: "white",
+        borderLeftStyle: "dashed", borderLeftWidth: "1px", borderLeftColor: "#c8c8c8",
+        borderRightStyle: "solid", borderRightWidth: "1px", borderRightColor: "#c8c8c8"
+      }} vertical justify='center'>
+        <span>{leftCollapsed ? <RightOutlined /> : <LeftOutlined />}</span>
+      </Flex>
       <Content>
         <MonacoDiffEditor
           original={original}
@@ -257,7 +271,14 @@ export default function DiffEditor({
           onNewChange={onNewChange}
         />
       </Content>
-      <Sider width="15%" reverseArrow={true} collapsible={true} theme="light" collapsedWidth={0}>
+      <Flex onClick={() => { setRightCollapsed(!rightCollapsed) }} style={{
+        width: "14px", cursor: "pointer", backgroundColor: "white",
+        borderLeftStyle: "solid", borderLeftWidth: "1px", borderLeftColor: "#c8c8c8",
+        borderRightStyle: "dashed", borderRightWidth: "1px", borderRightColor: "#c8c8c8"
+      }} vertical justify='center'>
+        <span>{rightCollapsed ? <LeftOutlined /> : <RightOutlined />}</span>
+      </Flex>
+      <Sider width="15%" collapsed={rightCollapsed} collapsible={true} trigger={null} theme="light" collapsedWidth={0}>
         <DirectoryTree
           showLine
           switcherIcon={<DownOutlined />}
@@ -284,7 +305,7 @@ export default function DiffEditor({
         </Button>
       </Col>
     </Row>
-  </>)
+  </>)}
 
   return (<>
     <Row>
