@@ -46,7 +46,7 @@ export default function Home() {
   const [dockerCmd, setDockerCmd] = useState("docker run --rm -v <path-to-folder>:/work am009/latexdiff-web-worker");
   const [configJson, setConfigJson] = useState("");
   const [pdfURL, setPdfURL] = useState("");
-  const [zipURL, setZipURL] = useState("");
+  const [diffProjectURL, setDiffProjectURL] = useState("");
   const [dockerOut, setDockerOut] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sendProgress, setSendProgress] = useState(1);
@@ -125,28 +125,26 @@ export default function Home() {
     }
     return config;
   }
-  // https://stackoverflow.com/a/62392022/13798540
-  const dataToBlobURL = (data: string) => {
+  const createBlobURLFromBase64 = (data: string, type: string) => {
     const byteString = window.atob(data);
     const arrayBuffer = new ArrayBuffer(byteString.length);
-    const int8Array = new Uint8Array(arrayBuffer);
+    const bytes = new Uint8Array(arrayBuffer);
     for (let i = 0; i < byteString.length; i++) {
-      int8Array[i] = byteString.charCodeAt(i);
+      bytes[i] = byteString.charCodeAt(i);
     }
-    const blob = new Blob([int8Array], { type: 'application/pdf' });
+    const blob = new Blob([bytes], { type });
     return URL.createObjectURL(blob);
   }
 
   const handleResponse = (data: any) => {
     setDockerOut(data.docker_output);
     setDockerCmd(data.docker_cmd);
-    // download the diff project zip.
     if (data.diff_proj !== null) {
-      setZipURL(dataToBlobURL(data.diff_proj));
+      setDiffProjectURL(createBlobURLFromBase64(data.diff_proj, 'application/x-tar'));
     }
     // download the diff pdf
     if (data.diff_pdf !== null) {
-      let url = dataToBlobURL(data.diff_pdf);
+      let url = createBlobURLFromBase64(data.diff_pdf, 'application/pdf');
       setPdfURL(url);
       window.open(url, '_blank');
     } else {
@@ -209,7 +207,7 @@ export default function Home() {
     setReceiveProgress(0);
     setDockerOut('');
     setPdfURL('');
-    setZipURL('');
+    setDiffProjectURL('');
     setCurrentTab("result");
 
     const xhr = new XMLHttpRequest();
@@ -450,7 +448,7 @@ export default function Home() {
           Download Diff PDF
         </Button>
         <Tooltip title="Select the download project option first.">
-          <Button type="primary" icon={<DownloadOutlined />} disabled={zipURL.length === 0} download="diff_proj.tar" href={zipURL}>
+          <Button type="primary" icon={<DownloadOutlined />} disabled={diffProjectURL.length === 0} download="diff_proj.tar" href={diffProjectURL}>
             Download Diff project TAR
           </Button>
         </Tooltip>
