@@ -110,11 +110,15 @@ def do_latex_diff(old_proj_zip: FileStorage, new_proj_zip: FileStorage, config: 
         if os.path.exists(diff_pdf_path) and os.path.isfile(diff_pdf_path) and not os.path.islink(diff_pdf_path):
             diff_pdf = os.path.join(tempdir, "diff.pdf")
             diff_pdf = file2b64(diff_pdf)
-        if download_diff_proj:
-            diff_proj = shutil.make_archive(os.path.join(tempdir, "diff_proj"), 'tar', os.path.join(tempdir, "git-latexdiff"), "new")
-            diff_proj = file2b64(diff_proj)
-        else:
-            diff_proj = None
+        diff_proj = None
+        try:
+            if download_diff_proj:
+                diff_proj = shutil.make_archive(os.path.join(tempdir, "diff_proj"), 'tar', os.path.join(tempdir, "git-latexdiff"), "new")
+                diff_proj = file2b64(diff_proj)
+        except Exception as e:
+            import traceback
+            docker_output += '\n'
+            docker_output += '\n'.join(traceback.format_exception(e))
         return {"diff_pdf": diff_pdf, "diff_proj": diff_proj, "docker_output": docker_output, "docker_cmd": cmd_str}
 
 
